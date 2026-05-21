@@ -44,7 +44,7 @@ export const Login = async (req, res) => {
     try {
         const { email, password } = req.body
 
-        const userExist = await pool.query('SELECT * FROM users WHERE email =$1'[email])
+        const userExist = await pool.query('SELECT * FROM users WHERE email =$1' , [email])
 
         if (userExist.rows.length === 0) {
             return res.status(400).json({
@@ -66,11 +66,11 @@ export const Login = async (req, res) => {
 
         const token = jwt.sign(
             { id: user.id },
-            process.JWT_SECRET,
+            process.env.JWT_SECRET,
             { expiresIn: '7d' }
         )
         res.cookie('token', token, {
-            httpOnly,
+            httpOnly: true,
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
@@ -84,4 +84,28 @@ export const Login = async (req, res) => {
         return res.status(500).json({ message: err.message })
         console.log("Error in login", error.message)
     }
+}
+
+export const logout = async (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 0
+    })
+    res.status(200).json({
+        success: true,
+        message: "User logged out successfully"
+    })
+}
+
+export const getUser = async (req, res) => {
+    const user = await pool.query('SELECT * FROM users WHERE id = $1' , [req.userId])
+    if (user.rows.length === 0) {
+        return res.status(404).json({ message: 'User not found' })
+    }
+    res.status(200).json({
+        success: true,
+        user: user.rows[0].name,
+        email: user.rows[0].email
+    })
 }

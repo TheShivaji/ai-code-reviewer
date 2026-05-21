@@ -13,6 +13,7 @@ const stateSchema = z.object({
     best_practices_feedback: z.string().optional(),
 
     final_review: z.string().optional(),
+
 });
 
 
@@ -253,10 +254,6 @@ const graph = new StateGraph({ channels: stateSchema })
     .addEdge("best_practices_feedback", "final_reviewer")
     .addEdge("final_reviewer", END)
     .compile();
-
-const mermaidGraph = graph.getGraph().drawMermaid();
-
-console.log(mermaidGraph);
 
 export const reviewCode = async (code, language) => {
     const result = await graph.invoke({

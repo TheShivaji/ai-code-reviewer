@@ -12,7 +12,7 @@ export const authUser = async(req , res , next) => {
 
     try{
         const decode = jwt.verify(token , process.env.JWT_SECRET)
-        req.user = decode.id
+        req.userId = decode.id
         next()
     }catch(error){
         res.status(401).json({

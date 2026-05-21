@@ -20,10 +20,12 @@ CREATE TABLE IF NOT EXISTS reviews (
     performance_feedback TEXT,
     best_practice_feedback TEXT,
     final_summary TEXT,
+    score INT,
+    share_token VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
         `);
-        
+
     } catch (error) {
         console.log(error);
     }
