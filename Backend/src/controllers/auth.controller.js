@@ -53,7 +53,7 @@ export const Login = async (req, res) => {
             })
         }
 
-        const user = result.rows[0]
+        const user = userExist.rows[0]
 
         const match = await bcrypt.compare(password, user.password)
 
@@ -81,7 +81,7 @@ export const Login = async (req, res) => {
 
 
     } catch (error) {
-        return res.status(500).json({ message: err.message })
+        return res.status(500).json({ message: error.message })
         console.log("Error in login", error.message)
     }
 }

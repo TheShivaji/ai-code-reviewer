@@ -26,6 +26,17 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
         `);
 
+        await pool.query(`
+            ALTER TABLE reviews ADD COLUMN IF NOT EXISTS score INT;
+            ALTER TABLE reviews ADD COLUMN IF NOT EXISTS share_token VARCHAR(255);
+            CREATE UNIQUE INDEX IF NOT EXISTS reviews_share_token_key ON reviews (share_token);
+            ALTER TABLE reviews ADD COLUMN IF NOT EXISTS source_type VARCHAR(50) DEFAULT 'paste';
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS security_feedback TEXT;
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS severity JSONB;
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS fixed_code TEXT;
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS pr_comment TEXT;
+        `);
+
     } catch (error) {
         console.log(error);
     }

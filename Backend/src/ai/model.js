@@ -17,8 +17,14 @@ export const groq = new ChatGroq({
     temperature: 0.2,
 })
 
-export const gemini = new ChatGoogleGenerativeAI({
-    model: "gemini-2.0-flash",
-    apiKey: process.env.GEMINI_API_KEY,
+export const gemini = new ChatGroq({
+    model: "llama-3.3-70b-versatile",
+    apiKey: process.env.GROQ_API_KEY,
+    temperature: 0.2,
+})
+
+export const mistral = new ChatMistralAI({
+    model: "mistral-large-latest",
+    apiKey: process.env.MISTRAL_API_KEY,
     temperature: 0.2,
 })

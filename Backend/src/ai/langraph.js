@@ -1,20 +1,29 @@
-import { StateGraph, START, END } from "@langchain/langgraph";
-import { z } from "zod";
-import { groq, llama, gemini } from "./model.js";
+import { StateGraph, START, END, Annotation } from "@langchain/langgraph"
+import { z } from "zod"
+import { groq, llama, gemini, mistral } from "./model.js"
+import { fetchFromURL } from "./fetcher.agent.js"
+import { security_agent } from "./security.agent.js"
+import { decision_layer } from "./decision.agent.js"
+import { fix_generator } from "./fixgenerator.agent.js"
+import { action_agent } from "./action.agent.js"
 
 
 
-const stateSchema = z.object({
-    code: z.string(),
-    language: z.string(),
+const stateSchema = Annotation.Root({
+    code: Annotation(),
+    language: Annotation(),
+    source_type: Annotation(),
 
-    bug_feedback: z.string().optional(),
-    performance_feedback: z.string().optional(),
-    best_practices_feedback: z.string().optional(),
+    security_feedback: Annotation(),
+    bug_feedback: Annotation(),
+    performance_feedback: Annotation(),
+    best_practices_feedback: Annotation(),
 
-    final_review: z.string().optional(),
-
-});
+    severity: Annotation(),
+    fixed_code: Annotation(),
+    pr_comment: Annotation(),
+    final_review: Annotation(),
+})
 
 
 const bug_detector = async (state) => {
@@ -241,29 +250,57 @@ Explain whether this code is production ready or not.
     }
 };
 // Lang graph
-const graph = new StateGraph({ channels: stateSchema })
+const graph = new StateGraph(stateSchema)
+    .addNode("security_agent", security_agent)
     .addNode("bug_detector", bug_detector)
     .addNode("performance_analyser", performance_analyser)
-    .addNode("best_practices_feedback", best_practices_feedback)
+    .addNode("best_practices_agent", best_practices_feedback)
+    .addNode("decision_layer", decision_layer)
+    .addNode("fix_generator", fix_generator)
+    .addNode("action_agent", action_agent)
     .addNode("final_reviewer", final_reviewer)
+    // START → parallel agents
+    .addEdge(START, "security_agent")
     .addEdge(START, "bug_detector")
     .addEdge(START, "performance_analyser")
-    .addEdge(START, "best_practices_feedback")
-    .addEdge("bug_detector", "final_reviewer")
-    .addEdge("performance_analyser", "final_reviewer")
-    .addEdge("best_practices_feedback", "final_reviewer")
-    .addEdge("final_reviewer", END)
-    .compile();
+    .addEdge(START, "best_practices_agent")
 
-export const reviewCode = async (code, language) => {
+    // All 4 → decision layer
+    .addEdge("security_agent", "decision_layer")
+    .addEdge("bug_detector", "decision_layer")
+    .addEdge("performance_analyser", "decision_layer")
+    .addEdge("best_practices_agent", "decision_layer")
+
+    // decision → fix generator
+    .addEdge("decision_layer", "fix_generator")
+
+    // fix generator → action agent
+    .addEdge("fix_generator", "action_agent")
+
+    // action agent → final reviewer
+    .addEdge("action_agent", "final_reviewer")
+
+    // final → END
+    .addEdge("final_reviewer", END)
+    .compile()
+
+export const reviewCode = async (code, language, sourceType = 'paste') => {
+    console.log("Invoking graph with input:", { code, language, sourceType });
     const result = await graph.invoke({
         code,
         language,
-    });
+        source_type: sourceType
+    })
+    console.log("Graph invoke returned:", result);
+
     return {
+        security_feedback: result.security_feedback,
         bug_feedback: result.bug_feedback,
         performance_feedback: result.performance_feedback,
         best_practices_feedback: result.best_practices_feedback,
+        severity: result.severity,
+        fixed_code: result.fixed_code,
+        pr_comment: result.pr_comment,
         final_review: result.final_review,
-    };
-};
+    }
+}

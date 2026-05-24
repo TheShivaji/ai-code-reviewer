@@ -2,12 +2,23 @@ import pool from '../db/database.js'
 import { reviewCode } from '../ai/langraph.js'
 import { detectLanguage } from '../utils/detectlanguage.js'
 import { extractScore } from '../utils/extractScore.js'
+import { fetchFromURL } from '../ai/fetcher.agent.js'
 import { v4 as uuidv4 } from 'uuid'
 
 export const createReview = async (req, res) => {
     try {
-        const { code } = req.body
-        const { language } = req.body
+        const { githubUrl, prUrl } = req.body
+        let { code } = req.body
+        let { language } = req.body
+        let sourceType = 'paste'
+
+        if (githubUrl) {
+            code = await fetchFromURL(githubUrl)
+            sourceType = 'github_url'
+        } else if (prUrl) {
+            code = await fetchFromURL(prUrl)
+            sourceType = 'pr_diff'
+        }
 
         if (!code) {
             return res.status(400).json({
@@ -21,21 +32,34 @@ export const createReview = async (req, res) => {
             console.log("Automatically detected language:", language)
         }
 
-        const review = await reviewCode(code, language)
+        const review = await reviewCode(code, language, sourceType)
         const score = extractScore(review.final_review)
         const shareToken = uuidv4()
-        const result = await pool.query('INSERT INTO reviews ( user_id , code , language , bug_feedback , performance_feedback , best_practice_feedback , final_summary , score , share_token) VALUES ($1 , $2 , $3 , $4 , $5 , $6 , $7 , $8 , $9 , $10) RETURNING id , user_id , code , language , bug_feedback , performance_feedback , best_practice_feedback , final_summary , score , share_token',
+        const result = await pool.query(
+            `INSERT INTO reviews (
+                user_id, code, language, source_type, security_feedback, 
+                bug_feedback, performance_feedback, best_practice_feedback, 
+                severity, fixed_code, pr_comment, final_summary, score, share_token
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+            ) RETURNING *`,
             [
-
                 req.userId,
                 code,
                 language,
+                sourceType,
+                review.security_feedback,
                 review.bug_feedback,
                 review.performance_feedback,
                 review.best_practices_feedback,
+                JSON.stringify(review.severity),
+                review.fixed_code,
+                review.pr_comment,
                 review.final_review,
                 score,
-                shareToken])
+                shareToken
+            ]
+        )
 
         res.status(201).json({
             success: true,
