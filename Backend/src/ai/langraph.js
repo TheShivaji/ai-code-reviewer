@@ -32,26 +32,28 @@ const bug_detector = async (state) => {
             {
                 role: "system",
                 content: `
-You are a senior software engineer and security auditor.
+You are a senior software engineer and code auditor.
 
-Analyze the given code carefully.
+Analyze the given code carefully for:
+1. Logic bugs
+2. Edge cases
+3. Bad error handling
+4. Null/undefined risks
 
-Your tasks:
-1. Detect logic bugs
-2. Detect security vulnerabilities
-3. Detect edge cases
-4. Detect bad error handling
-5. Detect null/undefined risks
+Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
 
-Rules:
-- Be extremely specific
-- Mention exact problematic code
-- Explain WHY it is an issue
-- Suggest corrected code
-- Assign severity:
-  Critical / High / Medium / Low
-
-Return output in markdown format.
+Format:
+{
+  "issues": [
+    {
+      "title": "Short title describing the bug",
+      "severity": "Critical/High/Medium/Low",
+      "description": "Specific details of what is wrong and why",
+      "fix": "Corrected code block or description of fix"
+    }
+  ],
+  "summary": "Overall summary of code bugs and quality"
+}
         `,
             },
             {
@@ -73,7 +75,7 @@ ${state.language}
         console.log("Bug Detector Error:", error.message);
 
         return {
-            bug_feedback: "Bug analysis failed.",
+            bug_feedback: JSON.stringify({ issues: [], summary: "Bug analysis failed." }),
         };
     }
 };
@@ -88,20 +90,27 @@ const performance_analyser = async (state) => {
 You are a senior performance engineer.
 
 Analyze the code for:
-
 1. Time complexity issues
 2. Memory inefficiencies
 3. Unnecessary loops
-4. Expensive database operations
+4. Expensive operations
 5. Blocking operations
 6. Poor async handling
 
-Rules:
-- Mention bottlenecks clearly
-- Suggest optimized alternatives
-- Mention Big-O complexity when relevant
+Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
 
-Return output in markdown format.
+Format:
+{
+  "issues": [
+    {
+      "title": "Short title describing the performance issue",
+      "severity": "Critical/High/Medium/Low",
+      "description": "Specific details of performance bottleneck and Big-O impact",
+      "fix": "Corrected code block or description of optimization"
+    }
+  ],
+  "summary": "Overall summary of code performance"
+}
         `,
             },
             {
@@ -123,7 +132,7 @@ ${state.language}
         console.log("Performance Analyser Error:", error.message);
 
         return {
-            performance_feedback: "Performance analysis failed.",
+            performance_feedback: JSON.stringify({ issues: [], summary: "Performance analysis failed." }),
         };
     }
 };
@@ -138,23 +147,26 @@ const best_practices_feedback = async (state) => {
 You are a senior software architect.
 
 Review the code for:
-
 1. Clean code principles
 2. Naming conventions
-3. Folder structure
-4. Reusability
-5. Maintainability
-6. Scalability
-7. SOLID principles
-8. Error handling
-9. Logging practices
+3. Reusability and Maintainability
+4. SOLID principles
+5. Error handling and logging
 
-Rules:
-- Be practical
-- Focus on production-grade improvements
-- Suggest industry-standard approaches
+Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
 
-Return output in markdown format.
+Format:
+{
+  "issues": [
+    {
+      "title": "Short title describing the best practice violation",
+      "severity": "Critical/High/Medium/Low",
+      "description": "Specific details of best practice violation and maintainability impact",
+      "fix": "Corrected code block or description of improvement"
+    }
+  ],
+  "summary": "Overall summary of code patterns and design"
+}
         `,
             },
             {
@@ -176,7 +188,7 @@ ${state.language}
         console.log("Best Practices Error:", error.message);
 
         return {
-            best_practices_feedback: "Best practices analysis failed.",
+            best_practices_feedback: JSON.stringify({ issues: [], summary: "Best practices analysis failed." }),
         };
     }
 };

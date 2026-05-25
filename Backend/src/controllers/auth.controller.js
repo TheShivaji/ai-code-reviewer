@@ -105,7 +105,10 @@ export const getUser = async (req, res) => {
     }
     res.status(200).json({
         success: true,
-        user: user.rows[0].name,
-        email: user.rows[0].email
+        user: {
+            id: user.rows[0].id,
+            name: user.rows[0].name,
+            email: user.rows[0].email
+        }
     })
 }
