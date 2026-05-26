@@ -13,7 +13,7 @@ const stateSchema = Annotation.Root({
     code: Annotation(),
     language: Annotation(),
     source_type: Annotation(),
-
+    is_Diff: Annotation(),
     security_feedback: Annotation(),
     bug_feedback: Annotation(),
     performance_feedback: Annotation(),
@@ -172,13 +172,18 @@ Format:
             {
                 role: "user",
                 content: `
-Code:
+${state.is_diff
+                        ? 'This is a CODE DIFF. Analyze ONLY the changed lines (lines starting with +). Ignore removed lines (-).'
+                        : 'This is a complete code file. Analyze the entire file.'
+                    }
+
+${state.is_diff ? 'Diff:' : 'Code:'}
 ${state.code}
 
 Language:
 ${state.language}
-        `,
-            },
+  `
+            }
         ]);
 
         return {
@@ -296,12 +301,13 @@ const graph = new StateGraph(stateSchema)
     .addEdge("final_reviewer", END)
     .compile()
 
-export const reviewCode = async (code, language, sourceType = 'paste') => {
-    console.log("Invoking graph with input:", { code, language, sourceType });
+export const reviewCode = async (code, language, sourceType = 'paste', isDiff = false) => {
+    console.log("Invoking graph with input:", { code, language, sourceType, isDiff });
     const result = await graph.invoke({
         code,
         language,
-        source_type: sourceType
+        source_type: sourceType,
+        is_diff: isDiff
     })
     console.log("Graph invoke returned:", result);
 

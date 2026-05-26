@@ -109,8 +109,9 @@ const InfoIcon = (props) => (
   </svg>
 )
 
-export function ReviewResult() {
-    const { currentReview, activeTab } = useSelector(s => s.review)
+export function ReviewResult({ review }) {
+    const { currentReview: reduxReview, activeTab } = useSelector(s => s.review)
+    const currentReview = review || reduxReview
     const [copied, setCopied] = useState(false)
     const [shareMsg, setShareMsg] = useState('')
 

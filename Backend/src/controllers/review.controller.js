@@ -12,11 +12,17 @@ export const createReview = async (req, res) => {
         let { language } = req.body
         let sourceType = 'paste'
 
+        let isDiff = false
+
         if (githubUrl) {
-            code = await fetchFromURL(githubUrl)
+            const fetched = await fetchFromURL(githubUrl)
+            code = fetched.code
+            isDiff = fetched.isDiff
             sourceType = 'github_url'
         } else if (prUrl) {
-            code = await fetchFromURL(prUrl)
+            const fetched = await fetchFromURL(prUrl)
+            code = fetched.code
+            isDiff = fetched.isDiff
             sourceType = 'pr_diff'
         }
 
@@ -112,8 +118,7 @@ export const getSharedReview = async (req, res) => {
     try {
         const { shareToken } = req.params
         const result = await pool.query(
-            `SELECT language, bug_feedback, performance_feedback, 
-                    best_practice_feedback, final_summary, score, created_at
+            `SELECT * 
              FROM reviews 
              WHERE share_token = $1`,
             [shareToken]
