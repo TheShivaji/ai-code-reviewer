@@ -34,8 +34,8 @@ app.use(cookieParser());
 
 
 
-app.use('/api/auth' , authRouter)
-app.use('/api/review' , reviewRouter)
+app.use('/api/auth', authRouter)
+app.use('/api/review', reviewRouter)
 
 
 
