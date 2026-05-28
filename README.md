@@ -1,249 +1,301 @@
 <div align="center">
 
-```
-█████╗ ██╗     ██████╗ ██████╗ ██████╗ ███████╗    ██████╗ ███████╗██╗   ██╗██╗███████╗██╗    ██╗███████╗██████╗
-██╔══██╗██║    ██╔════╝██╔═══██╗██╔══██╗██╔════╝    ██╔══██╗██╔════╝██║   ██║██║██╔════╝██║    ██║██╔════╝██╔══██╗
-███████║██║    ██║     ██║   ██║██║  ██║█████╗      ██████╔╝█████╗  ██║   ██║██║█████╗  ██║ █╗ ██║█████╗  ██████╔╝
-██╔══██║██║    ██║     ██║   ██║██║  ██║██╔══╝      ██╔══██╗██╔══╝  ╚██╗ ██╔╝██║██╔══╝  ██║███╗██║██╔══╝  ██╔══██╗
-██║  ██║██║    ╚██████╗╚██████╔╝██████╔╝███████╗    ██║  ██║███████╗ ╚████╔╝ ██║███████╗╚███╔███╔╝███████╗██║  ██║
-╚═╝  ╚═╝╚═╝     ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝    ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝
-```
+<img src="https://capsule-render.vercel.app/api?type=venom&color=0:7c3aed,50:a855f7,100:6d28d9&height=200&section=header&text=AI%20Code%20Reviewer&fontSize=60&fontAlign=50&animation=fadeIn&fontAlignY=50&fontColor=ffffff" />
 
-**8 specialized AI agents. One unified pipeline. Zero tolerance for bad code.**
+<br/>
 
-[![Live](https://img.shields.io/badge/LIVE-ai--code--reviewer.theshivaji.in-a78bfa?style=flat-square&logo=vercel)](https://ai-code-reviewer.theshivaji.in)
-![LangGraph](https://img.shields.io/badge/LangGraph-1.3.2-7c3aed?style=flat-square)
-![Stack](https://img.shields.io/badge/MERN-PostgreSQL-0077B5?style=flat-square)
-![Deploy](https://img.shields.io/badge/Render-Vercel-22c55e?style=flat-square)
+<a href="https://ai-code-reviewer.theshivaji.in">
+  <img src="https://img.shields.io/badge/◉%20LIVE%20DEMO-ai--code--reviewer.theshivaji.in-7c3aed?style=for-the-badge&logoColor=white" />
+</a>
+
+<br/><br/>
+
+<img src="https://img.shields.io/badge/LangGraph-1.3.2-a855f7?style=flat-square" />
+<img src="https://img.shields.io/badge/Agents-8-7c3aed?style=flat-square" />
+<img src="https://img.shields.io/badge/Stack-MERN%20%2B%20PostgreSQL-6d28d9?style=flat-square" />
+<img src="https://img.shields.io/badge/Deploy-Render%20%2B%20Vercel-22c55e?style=flat-square" />
+<img src="https://img.shields.io/badge/License-MIT-0077B5?style=flat-square" />
+
+<br/><br/>
+
+> **8 specialized AI agents. One unified pipeline. Zero tolerance for bad code.**
 
 </div>
 
 ---
 
+## ⚡ What is this?
+
+Not another "ask ChatGPT to review my code" wrapper.
+
+This is a **stateful LangGraph pipeline** where 4 agents run in parallel, feed their results into a decision layer, which triggers a fix generator, then an action agent formats a PR comment, and finally a staff-level reviewer produces a complete engineering report — all automatically.
+
+You paste code, drop a GitHub URL, or link a PR. The agents handle the rest.
+
+---
+
+## 🧠 Agent Pipeline
+
+<div align="center">
+
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          HOW IT WORKS                                       │
-│                                                                             │
-│   paste code                                                                │
-│   github url    ──►  FETCHER  ──►  ┌──────────────────────────────────┐   │
-│   PR diff                          │         PARALLEL AGENTS           │   │
-│                                    │                                    │   │
-│                                    │  🔒 Security     (Mistral Large)  │   │
-│                                    │  🐛 Bug Detect   (Llama 3.3 70B)  │   │
-│                                    │  ⚡ Performance  (Groq/Llama)     │   │
-│                                    │  ✅ Best Practic (Groq/Llama)     │   │
-│                                    └──────────────┬───────────────────┘   │
-│                                                   │                        │
-│                                    ⚖️  Decision Layer  (Gemini)            │
-│                                    Critical / Warning / Low                │
-│                                                   │                        │
-│                                    🔧 Fix Generator   (Gemini)            │
-│                                    corrected code with // FIXED: comments  │
-│                                                   │                        │
-│                                    💬 Action Agent    (Gemini)            │
-│                                    PR comment format + severity table      │
-│                                                   │                        │
-│                                    🎯 Final Reviewer  (Gemini)            │
-│                                    score /10 + production readiness        │
-│                                                   │                        │
-│                                              JSON Response                 │
-└─────────────────────────────────────────────────────────────────────────────┘
+                    ┌─────────────────────────────────────┐
+   paste code ─────▶│                                     │
+   github url ─────▶│         INPUT PROCESSING            │
+   PR diff ─────────▶│         (Fetcher Agent)             │
+                    └──────────────┬──────────────────────┘
+                                   │
+                    ┌──────────────▼──────────────────────┐
+                    │      PARALLEL EXECUTION              │
+                    │                                     │
+                    │  🔒 Security Agent  (Mistral Large) │
+                    │  🐛 Bug Detector   (Llama 3.3 70B)  │
+                    │  ⚡ Performance    (Groq / Llama)   │
+                    │  ✅ Best Practices (Groq / Llama)   │
+                    └──────────────┬──────────────────────┘
+                                   │ all 4 complete
+                    ┌──────────────▼──────────────────────┐
+                    │  ⚖️  Decision Layer   (Gemini)       │
+                    │     Critical / Warning / Low         │
+                    └──────────────┬──────────────────────┘
+                                   │
+                    ┌──────────────▼──────────────────────┐
+                    │  🔧 Fix Generator    (Gemini)        │
+                    │     corrected code + // FIXED:       │
+                    └──────────────┬──────────────────────┘
+                                   │
+                    ┌──────────────▼──────────────────────┐
+                    │  💬 Action Agent     (Gemini)        │
+                    │     PR comment + markdown table      │
+                    └──────────────┬──────────────────────┘
+                                   │
+                    ┌──────────────▼──────────────────────┐
+                    │  🎯 Final Reviewer   (Gemini)        │
+                    │     score /10 + production verdict   │
+                    └──────────────┬──────────────────────┘
+                                   │
+                              JSON Response
+```
+
+</div>
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🔒 **Security Scan** | SQL injection, XSS, hardcoded secrets, CORS misconfig |
+| 🐛 **Bug Detection** | Logic errors, edge cases, null risks, bad error handling |
+| ⚡ **Performance** | Big-O analysis, memory leaks, blocking operations |
+| ✅ **Best Practices** | SOLID principles, clean code, naming conventions |
+| ⚖️ **Severity Rating** | Critical / Warning / Low per issue |
+| 🔧 **Fix Generator** | Full corrected code with `// FIXED:` comments |
+| 💬 **PR Comment** | GitHub/GitLab markdown table format, copy-paste ready |
+| 🎯 **Final Report** | Score /10, strengths, production readiness verdict |
+| 🌐 **3 Input Types** | Paste code / GitHub file URL / PR diff URL |
+| 🔗 **Share Links** | Unique URL per review — no auth needed to view |
+| 📊 **Score History** | Track code quality improvement over time |
+| 🧠 **isDiff Mode** | Analyze only changed lines — saves tokens |
+| 🔍 **Auto Detect** | Language auto-detection from code patterns |
+
+---
+
+## 🛠️ Tech Stack
+
+```
+Frontend              Backend               Database
+──────────────        ──────────────        ──────────────
+React 19              Node.js               PostgreSQL
+Redux Toolkit         Express 5             Neon (cloud)
+Framer Motion         LangGraph 1.3.2       pg driver
+Tailwind CSS v4       LangChain
+Lucide Icons          JWT + bcrypt
+React Markdown        HTTP-only cookies
+
+AI Models             Deploy
+──────────────        ──────────────
+Mistral Large         Render (Backend)
+Llama 3.3 70B         Vercel (Frontend)
+Gemini 2.0 Flash      Neon PostgreSQL
+Groq inference        Docker ready
 ```
 
 ---
 
-## Features
-
-```
-INPUT                          OUTPUT
-─────────────────────          ──────────────────────────────────────────
-✦ Paste code directly          ✦ Security vulnerabilities (SQL injection,
-✦ GitHub file URL                XSS, hardcoded secrets, CORS issues)
-✦ PR diff URL                  ✦ Bug report with severity levels
-✦ Auto language detection      ✦ Performance bottlenecks + Big-O
-✦ isDiff mode (tokens saved)   ✦ Best practices (SOLID, clean code)
-                               ✦ Severity: Critical / Warning / Low
-                               ✦ Fixed code with FIXED: comments
-                               ✦ PR comment (markdown table format)
-                               ✦ Final score /10 + verdict
-                               ✦ Shareable review link (no auth needed)
-                               ✦ Score history tracking
-```
-
----
-
-## Stack
-
-```
-┌─────────────────┬──────────────────────────────────────────────┐
-│ Layer           │ Technology                                    │
-├─────────────────┼──────────────────────────────────────────────┤
-│ Frontend        │ React 19 + Redux Toolkit + Framer Motion      │
-│                 │ Tailwind CSS v4 + Lucide + React Markdown      │
-├─────────────────┼──────────────────────────────────────────────┤
-│ Backend         │ Node.js + Express 5                           │
-├─────────────────┼──────────────────────────────────────────────┤
-│ Database        │ PostgreSQL (Neon) + pg                        │
-├─────────────────┼──────────────────────────────────────────────┤
-│ AI Framework    │ LangGraph 1.3.2 + LangChain                  │
-├─────────────────┼──────────────────────────────────────────────┤
-│ Security Agent  │ Mistral Large                                 │
-│ Bug + Perf      │ Llama 3.3 70B via Groq                       │
-│ Decision + Fix  │ Gemini 2.0 Flash                             │
-├─────────────────┼──────────────────────────────────────────────┤
-│ Auth            │ JWT + bcrypt + HTTP-only cookies              │
-├─────────────────┼──────────────────────────────────────────────┤
-│ Deploy          │ Render (Backend) + Vercel (Frontend)         │
-│                 │ Neon PostgreSQL + Docker ready               │
-└─────────────────┴──────────────────────────────────────────────┘
-```
-
----
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 ai-code-reviewer/
-│
 ├── Backend/
 │   ├── Dockerfile
 │   ├── server.js
 │   └── src/
 │       ├── ai/
-│       │   ├── model.js              → Mistral + Groq + Gemini init
-│       │   ├── langraph.js           → StateGraph pipeline
-│       │   ├── fetcher.agent.js      → GitHub URL + PR diff fetch
-│       │   ├── security.agent.js     → Mistral security scan
-│       │   ├── decision.agent.js     → Severity classification
-│       │   ├── fixgenerator.agent.js → Code correction
-│       │   └── action.agent.js       → PR comment generation
+│       │   ├── model.js              ← Mistral + Groq + Gemini
+│       │   ├── langraph.js           ← StateGraph pipeline
+│       │   ├── fetcher.agent.js      ← GitHub URL + PR diff
+│       │   ├── security.agent.js     ← vulnerability scan
+│       │   ├── decision.agent.js     ← severity classification
+│       │   ├── fixgenerator.agent.js ← code correction
+│       │   └── action.agent.js       ← PR comment format
 │       ├── controllers/
-│       │   ├── auth.controller.js    → register / login / logout
-│       │   └── review.controller.js  → create / get / share
+│       │   ├── auth.controller.js
+│       │   └── review.controller.js
 │       ├── db/
-│       │   ├── database.js           → pg Pool (Neon + local)
-│       │   └── Schema.js             → CREATE TABLE + ALTER
-│       ├── middleware/
-│       │   └── auth.middleware.js    → JWT protectRoute
+│       │   ├── database.js           ← pg Pool (Neon + local)
+│       │   └── Schema.js             ← CREATE TABLE + ALTER
+│       ├── middleware/auth.middleware.js
 │       ├── routes/
 │       │   ├── auth.routes.js
 │       │   └── review.routes.js
 │       └── utils/
-│           ├── detectlanguage.js     → pattern-based auto detect
-│           └── extractScore.js       → regex score extraction
+│           ├── detectlanguage.js     ← pattern-based detection
+│           └── extractScore.js       ← regex score extraction
 │
 └── Frontend/
     └── src/
-        ├── app/
-        │   ├── App.jsx
-        │   ├── app.routes.jsx        → Protected + Public guards
-        │   └── app.store.js          → Redux store
+        ├── app/                      ← store + routes
         └── features/
-            ├── auth/
-            │   ├── auth.slice.js
-            │   ├── pages/            → Login, Register
-            │   ├── hook/useAuth.js
-            │   └── services/api.js
-            └── chat/
-                ├── reviewSlice.js
-                ├── pages/            → Dashboard, History, SharedReview
-                ├── components/       → Navbar, AgentLoader, ReviewResult, ReviewTabs
-                └── services/api.js
+            ├── auth/                 ← slice + pages + hooks
+            └── chat/                 ← slice + pages + components
+                ├── pages/            ← Dashboard, History, SharedReview
+                └── components/       ← Navbar, AgentLoader, ReviewResult
 ```
 
 ---
 
-## Setup
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js v18+
+- PostgreSQL (local) or Neon account
+- API keys: Mistral, Groq, Gemini
+
+### Installation
 
 ```bash
-# Clone
 git clone https://github.com/TheShivaji/ai-code-reviewer.git
 cd ai-code-reviewer
 
 # Backend
 cd Backend && npm install
 
-# Frontend
+# Frontend  
 cd ../Frontend && npm install
 ```
 
-**Backend `.env`:**
+### Environment
+
+Create `Backend/.env`:
+
 ```env
 PORT=3000
-DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
 
-JWT_SECRET=your_secret
+# Database (use one)
+DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
+# OR
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=code_reviewer
+DB_USER=postgres
+DB_PASSWORD=your_password
+
+# Auth
+JWT_SECRET=your_jwt_secret
+
+# AI Keys
 MISTRAL_API_KEY=your_key
 GROQ_API_KEY=your_key
 GEMINI_API_KEY=your_key
-GITLAB_TOKEN=your_token        # optional — for private GitLab repos
+
+# Optional
+GITLAB_TOKEN=your_token
 FRONTEND_URL=http://localhost:5173
 ```
 
+### Run
+
 ```bash
-# Run backend
+# Terminal 1 — Backend
 cd Backend && npm run dev
 
-# Run frontend
+# Terminal 2 — Frontend
 cd Frontend && npm run dev
 ```
 
----
-
-## API
-
 ```
-POST   /api/auth/register
-POST   /api/auth/login
-POST   /api/auth/logout
-GET    /api/auth/me
-
-POST   /api/review/create          → triggers 8-agent pipeline
-GET    /api/review/reviews          → history
-GET    /api/review/score-history    → score trend
-GET    /api/review/share/:token     → public shared review
+Frontend → http://localhost:5173
+Backend  → http://localhost:3000
 ```
 
 ---
 
-## Roadmap
+## 🔌 API Reference
 
 ```
-✅ Auth — register, login, JWT + HTTP-only cookies
-✅ PostgreSQL schema — 14 columns per review
-✅ Fetcher Agent — GitHub file + PR diff + paste
-✅ Security Agent — Mistral Large
-✅ Bug Detector — Llama 3.3 70B
-✅ Performance Analyzer — Groq
-✅ Best Practices Agent — Groq
-✅ Decision Layer — Critical / Warning / Low
-✅ Fix Generator — corrected code
-✅ Action Agent — PR comment markdown table
-✅ Final Reviewer — score + production verdict
-✅ isDiff mode — analyze only changed lines
-✅ Language auto-detection
-✅ Score extraction + history
-✅ Shareable review links
-✅ Redux Toolkit + Framer Motion UI
-✅ Dashboard — paste / GitHub URL / PR diff tabs
-✅ History + Shared review pages
-✅ Deployed — Render + Vercel + Neon PostgreSQL
-✅ Docker ready
-⬜ GitLab MCP integration
-⬜ Webhook — auto-trigger on MR create
-⬜ Voice review summary
+Auth
+────────────────────────────────────────
+POST  /api/auth/register
+POST  /api/auth/login
+POST  /api/auth/logout
+GET   /api/auth/me
+
+Reviews
+────────────────────────────────────────
+POST  /api/review/create          8-agent pipeline trigger
+GET   /api/review/reviews          history (auth required)
+GET   /api/review/score-history    score trend (auth required)
+GET   /api/review/share/:token     public shared review
+```
+
+---
+
+## 📌 Roadmap
+
+- [x] Full auth system — JWT + HTTP-only cookies
+- [x] PostgreSQL schema — 14 columns per review
+- [x] Fetcher Agent — GitHub file + PR diff + paste
+- [x] 4 parallel agents — Security, Bug, Performance, Best Practices
+- [x] Decision Layer — Critical / Warning / Low severity
+- [x] Fix Generator — corrected code with comments
+- [x] Action Agent — PR comment markdown table
+- [x] Final Reviewer — score + production verdict
+- [x] isDiff mode — diff-only analysis
+- [x] Language auto-detection
+- [x] Score history tracking
+- [x] Shareable review links
+- [x] Redux Toolkit + Framer Motion UI
+- [x] Deployed — Render + Vercel + Neon PostgreSQL
+- [x] Docker support
+- [ ] GitLab MCP integration
+- [ ] Webhook — auto-trigger on MR create
+
+---
+
+## 🤝 Contributing
+
+```bash
+# Fork → Clone → Branch → Push → PR
+git checkout -b feature/your-feature
+git commit -m "feat: your feature"
+git push origin feature/your-feature
 ```
 
 ---
 
 <div align="center">
 
-**Built by [Shivaji Jagdale](https://github.com/TheShivaji)**
+**Built by Shivaji Jagdale**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://linkedin.com/in/prathamesh-jagdale-48817330b)
-[![GitHub](https://img.shields.io/badge/GitHub-171515?style=flat-square&logo=github&logoColor=white)](https://github.com/TheShivaji)
-[![Portfolio](https://img.shields.io/badge/Portfolio-theshivaji.in-a78bfa?style=flat-square)](https://theshivaji.in)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/prathamesh-jagdale-48817330b)
+[![GitHub](https://img.shields.io/badge/GitHub-171515?style=for-the-badge&logo=github&logoColor=white)](https://github.com/TheShivaji)
+[![Portfolio](https://img.shields.io/badge/Portfolio-a855f7?style=for-the-badge&logo=safari&logoColor=white)](https://theshivaji.in)
 
-*⭐ Star this repo if you find it useful*
+<br/>
+
+*⭐ Star this repo if you find it useful — keeps the motivation alive*
+
+<img src="https://capsule-render.vercel.app/api?type=venom&color=0:6d28d9,50:7c3aed,100:a855f7&height=100&section=footer" />
 
 </div>
