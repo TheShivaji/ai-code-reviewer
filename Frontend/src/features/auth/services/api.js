@@ -1,7 +1,18 @@
 import axios from 'axios'
 
+let baseURL = import.meta.env.VITE_API_URL || (
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000/api'
+    : 'https://ai-code-reviewer-b244.onrender.com/api'
+)
+
+// Ensure baseURL ends with /api
+if (baseURL && !baseURL.endsWith('/api') && !baseURL.endsWith('/api/')) {
+  baseURL = baseURL.replace(/\/+$/, '') + '/api'
+}
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : 'https://ai-code-reviewer-b244.onrender.com/api'),
+  baseURL,
   withCredentials: true,
 })
 
