@@ -2,6 +2,16 @@ import jwt from "jsonwebtoken"
 import pool from "../db/database.js"
 import bcrypt from "bcrypt"
 
+const getCookieOptions = (req) => {
+    const isProduction = process.env.NODE_ENV === 'production' || (req.headers.origin && req.headers.origin.startsWith('https'));
+    return {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax'
+    };
+};
+
 export const userRegister = async (req, res) => {
     try {
         const { name, email, password } = req.body
@@ -24,10 +34,7 @@ export const userRegister = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         )
-        res.cookie('token', token, {
-            httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+        res.cookie('token', token, getCookieOptions(req))
 
         res.status(201).json({
             success: true,
@@ -69,10 +76,7 @@ export const Login = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         )
-        res.cookie('token', token, {
-            httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+        res.cookie('token', token, getCookieOptions(req))
 
         res.status(201).json({
             success: true,
@@ -87,9 +91,11 @@ export const Login = async (req, res) => {
 }
 
 export const logout = async (req, res) => {
+    const options = getCookieOptions(req);
     res.clearCookie('token', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        httpOnly: options.httpOnly,
+        secure: options.secure,
+        sameSite: options.sameSite,
         maxAge: 0
     })
     res.status(200).json({
