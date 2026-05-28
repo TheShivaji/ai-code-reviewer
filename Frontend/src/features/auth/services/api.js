@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const api = axios.create({
-  baseURL: 'https://ai-code-reviewer-b244.onrender.com || http://localhost:3000',
+  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : 'https://ai-code-reviewer-b244.onrender.com/api'),
   withCredentials: true,
 })
 
