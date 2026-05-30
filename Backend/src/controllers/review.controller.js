@@ -14,18 +14,26 @@ export const createReview = async (req, res) => {
 
         let isDiff = false
 
+        let actualGitLabUrl = gitlabUrl
+        let actualPrUrl = prUrl
+
+        if (prUrl && prUrl.includes('gitlab.com')) {
+            actualGitLabUrl = prUrl
+            actualPrUrl = undefined
+        }
+
         if (githubUrl) {
             const fetched = await fetchFromURL(githubUrl)
             code = fetched.code
             isDiff = fetched.isDiff
             sourceType = 'github_url'
-        } else if (prUrl) {
-            const fetched = await fetchFromURL(prUrl)
+        } else if (actualPrUrl) {
+            const fetched = await fetchFromURL(actualPrUrl)
             code = fetched.code
             isDiff = fetched.isDiff
             sourceType = 'pr_diff'
-        } else if (gitlabUrl) {
-            const fetched = await fetchFromURL(gitlabUrl)
+        } else if (actualGitLabUrl) {
+            const fetched = await fetchFromURL(actualGitLabUrl)
             code = fetched.code
             isDiff = fetched.isDiff
             sourceType = 'gitlab_url'
@@ -46,9 +54,9 @@ export const createReview = async (req, res) => {
         const review = await reviewCode(code, language, sourceType, isDiff)
 
         // GitLab pe auto comment post karo
-        if (gitlabUrl && review.pr_comment) {
+        if (actualGitLabUrl && review.pr_comment) {
             const { postGitLabComment } = await import('../ai/fetcher.agent.js')
-            await postGitLabComment(gitlabUrl, review.pr_comment)
+            await postGitLabComment(actualGitLabUrl, review.pr_comment)
         }
         const score = extractScore(review.final_review)
         const shareToken = uuidv4()

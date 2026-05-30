@@ -35,6 +35,8 @@ export const fetchFromURL = async (url) => {
         const [, projectPath, mrId] = parts
         const encodedPath = encodeURIComponent(projectPath)
         const apiUrl = `https://gitlab.com/api/v4/projects/${encodedPath}/merge_requests/${mrId}/diffs`
+        console.log(`[Fetcher] Fetching GitLab MR Diffs from: ${apiUrl}`)
+        console.log(`[Fetcher] Using GITLAB_TOKEN: ${process.env.GITLAB_TOKEN ? 'Yes (starts with ' + process.env.GITLAB_TOKEN.substring(0, 10) + '...)' : 'No'}`)
         const response = await axios.get(apiUrl, {
           headers: process.env.GITLAB_TOKEN
             ? { 'PRIVATE-TOKEN': process.env.GITLAB_TOKEN }
@@ -50,6 +52,7 @@ export const fetchFromURL = async (url) => {
     throw new Error('Invalid URL format')
 
   } catch (error) {
+    console.error(`[Fetcher] Error details:`, error.response ? { status: error.response.status, data: error.response.data } : error.message)
     throw new Error(`Fetch failed: ${error.message}`)
   }
 }

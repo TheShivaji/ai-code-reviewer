@@ -46,7 +46,13 @@ export function Dashboard() {
       const payload = { language }
       if (activeTab === 'paste') payload.code = code
       if (activeTab === 'github') payload.githubUrl = githubUrl
-      if (activeTab === 'pr') payload.prUrl = prUrl
+      if (activeTab === 'pr') {
+        if (prUrl.includes('gitlab.com')) {
+          payload.gitlabUrl = prUrl
+        } else {
+          payload.prUrl = prUrl
+        }
+      }
 
       const res = await createReviewAPI(payload)
       if (res.success) {
@@ -240,20 +246,20 @@ export function Dashboard() {
                       className="space-y-2"
                     >
                       <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
-                        Pull Request URL
+                        PR / MR URL
                       </label>
                       <div className="relative">
                         <GitFork className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
                         <input
                           type="url"
-                          placeholder="https://github.com/owner/repo/pull/1"
+                          placeholder="https://github.com/.../pull/1 or https://gitlab.com/.../-/merge_requests/1"
                           value={prUrl}
                           onChange={(e) => setPrUrl(e.target.value)}
                           className="w-full bg-slate-950/80 border border-slate-800 hover:border-slate-700 focus:border-purple-500 text-slate-100 placeholder-slate-600 rounded-xl py-3 pl-11 pr-4 outline-none transition duration-300 text-xs"
                         />
                       </div>
                       <p className="text-[10px] text-slate-500 italic mt-1 pl-1">
-                        Ensure the Pull Request is open and public.
+                        Ensure the Pull/Merge Request is open and accessible.
                       </p>
                     </motion.div>
                   )}
