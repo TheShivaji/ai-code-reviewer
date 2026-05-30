@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export const createReview = async (req, res) => {
     try {
-        const { githubUrl, prUrl } = req.body
+        const { githubUrl, prUrl, gitlabUrl } = req.body
         let { code } = req.body
         let { language } = req.body
         let sourceType = 'paste'
@@ -24,6 +24,11 @@ export const createReview = async (req, res) => {
             code = fetched.code
             isDiff = fetched.isDiff
             sourceType = 'pr_diff'
+        } else if (gitlabUrl) {
+            const fetched = await fetchFromURL(gitlabUrl)
+            code = fetched.code
+            isDiff = fetched.isDiff
+            sourceType = 'gitlab_url'
         }
 
         if (!code) {
@@ -38,7 +43,13 @@ export const createReview = async (req, res) => {
             console.log("Automatically detected language:", language)
         }
 
-        const review = await reviewCode(code, language, sourceType)
+        const review = await reviewCode(code, language, sourceType, isDiff)
+
+        // GitLab pe auto comment post karo
+        if (gitlabUrl && review.pr_comment) {
+            const { postGitLabComment } = await import('../ai/fetcher.agent.js')
+            await postGitLabComment(gitlabUrl, review.pr_comment)
+        }
         const score = extractScore(review.final_review)
         const shareToken = uuidv4()
         const result = await pool.query(

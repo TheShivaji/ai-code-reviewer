@@ -53,3 +53,22 @@ export const fetchFromURL = async (url) => {
     throw new Error(`Fetch failed: ${error.message}`)
   }
 }
+
+export const postGitLabComment = async (mrUrl, comment) => {
+  try {
+    const parts = mrUrl.match(/gitlab\.com\/(.+?)\/-\/merge_requests\/(\d+)/)
+    if (!parts) throw new Error('Invalid GitLab MR URL')
+
+    const [, projectPath, mrId] = parts
+    const encodedPath = encodeURIComponent(projectPath)
+
+    await axios.post(
+      `https://gitlab.com/api/v4/projects/${encodedPath}/merge_requests/${mrId}/notes`,
+      { body: comment },
+      { headers: { 'PRIVATE-TOKEN': process.env.GITLAB_TOKEN } }
+    )
+    console.log('✅ GitLab comment posted!')
+  } catch (error) {
+    console.log('GitLab comment failed:', error.message)
+  }
+}
