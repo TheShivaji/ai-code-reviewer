@@ -1,191 +1,144 @@
-<div align="center">
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f2027,50:203a43,100:2c5364&height=220&section=header&text=AI%20Code%20Reviewer&fontSize=72&fontAlign=50&animation=fadeIn&fontAlignY=38&desc=Multi-Agent%20Code%20Review%20%7C%20LangGraph%20%2B%20Gemini&descAlign=50&descAlignY=60&fontColor=ffffff&descColor=67e8f9" alt="Header" />
-
-</div>
-
-<div align="center">
-
-![Node.js](https://img.shields.io/badge/Node.js-18+-00d084?style=for-the-badge&logo=node.js&logoColor=white)
-![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-06b6d4?style=for-the-badge)
-![Gemini](https://img.shields.io/badge/Google_Gemini-AI_Core-0ea5e9?style=for-the-badge&logo=google&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES2024-f0db4f?style=for-the-badge&logo=javascript&logoColor=black)
-![License](https://img.shields.io/badge/License-MIT-22d3ee?style=for-the-badge)
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f0c29,30:1a1040,60:302b63,100:24243e&height=200&section=header&text=AI%20Code%20Reviewer&fontSize=52&fontAlign=50&animation=fadeIn&fontAlignY=40&desc=8-Agent%20LangGraph%20Pipeline%20%7C%20Auto%20GitLab%20MR%20Comments&descAlign=50&descAlignY=62&fontColor=ffffff&descColor=a78bfa" />
 
 <br/>
 
-> **8 AI Agents. 1 Perfect Code Review. GitHub PR format mein output.**
+[![Live](https://img.shields.io/badge/◉%20LIVE-ai--code--reviewer-7c3aed?style=for-the-badge)](https://ai-code-reviewer-iota.vercel.app)
+![LangGraph](https://img.shields.io/badge/LangGraph-1.3.2-a855f7?style=flat-square)
+![Agents](https://img.shields.io/badge/Agents-8-7c3aed?style=flat-square)
+![Stack](https://img.shields.io/badge/MERN-PostgreSQL-0077B5?style=flat-square)
+![Deploy](https://img.shields.io/badge/Render-Vercel-22c55e?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square)
+
+> **8 specialized AI agents. One unified pipeline. Auto-posts review comments on GitLab MRs.**
 
 </div>
 
 ---
 
-## 🧠 What Is This?
+## ⚡ What is this?
 
-```ts
-const aiCodeReviewer = {
-  what:    "Multi-agent system that reviews your code automatically",
-  how:     "LangGraph orchestrates 8 parallel agents → Gemini synthesizes",
-  output:  "GitHub PR comment — ready to paste or auto-post",
-  stack:   ["Node.js", "LangGraph", "Gemini API", "HTML/CSS/JS"],
-  builtBy: "TheShivaji",
-};
-```
+Not another "ask ChatGPT to review my code" wrapper.
 
-Sirf apna code paste karo. Teen specialized AI agents parallel mein kaam karte hain — bugs, performance, aur best practices — phir Gemini ek clean final report banata hai **GitHub PR comment format** mein.
+This is a **stateful LangGraph pipeline** — 4 agents run in parallel, feed their results into a decision layer, which triggers a fix generator, then an action agent formats a PR comment table, and finally a staff-level reviewer produces a complete engineering report.
+
+You paste code, drop a GitHub URL, link a PR, or give a GitLab MR URL — the agents handle the rest, and the review **automatically posts as a comment on your GitLab MR**.
 
 ---
 
-## 🔄 System Architecture
+## 🧠 Agent Pipeline
 
 ```
-╔══════════════════════════════════════════════════════════════╗
-║                      DEVELOPER INPUT                         ║
-║              Code paste karo → Frontend UI                   ║
-╚══════════════════════╦═══════════════════════════════════════╝
-                       ║
-                       ▼
-╔══════════════════════════════════════════════════════════════╗
-║              Node.js Backend  (Express API)                  ║
-╚══════════════════════╦═══════════════════════════════════════╝
-                       ║
-                       ▼
-╔══════════════════════════════════════════════════════════════╗
-║              LangGraph Orchestration Layer                    ║
-║               [ 3 Agents run in parallel ]                   ║
-╠═══════════════╦══════════════════╦═══════════════════════════╣
-║               ║                  ║                           ║
-▼               ▼                  ▼                           ║
-┌───────────┐ ┌────────────┐ ┌──────────────┐                 ║
-│  AGENT 1  │ │  AGENT 2   │ │   AGENT 3    │                 ║
-│           │ │            │ │              │                 ║
-│    Bug    │ │  Perf.     │ │    Best      │                 ║
-│ Detector  │ │ Analyzer   │ │  Practices   │                 ║
-│           │ │            │ │  Checker     │                 ║
-│ • Security│ │ • Big-O    │ │ • SOLID/DRY  │                 ║
-│ • Logic   │ │ • Loops    │ │ • Naming     │                 ║
-│ • Nulls   │ │ • Caching  │ │ • Patterns   │                 ║
-│ • Leaks   │ │ • DB Query │ │ • Docs       │                 ║
-└─────┬─────┘ └─────┬──────┘ └──────┬───────┘                 ║
-      └─────────────┴───────────────┘                          ║
-                    ║                                           ║
-                    ▼                                           ║
-╔══════════════════════════════════════════════════════════════╝
-║              Google Gemini — Final Report Generator
-║              All 3 agent outputs → 1 unified review
-╚══════════════════════╦═══════════════════════════════════════╝
-                       ║
-                       ▼
-╔══════════════════════════════════════════════════════════════╗
-║         📋  GitHub PR Comment Format Output                  ║
-╚══════════════════════════════════════════════════════════════╝
+  paste code ──┐
+  github url ──┼──► Fetcher Agent ──► LangGraph START
+  pr diff    ──┤                              │
+  gitlab mr  ──┘                    ┌─────────┴──────────┐
+                                    │    PARALLEL (4x)    │
+                              🔒 Security  (Mistral Large)
+                              🐛 Bug       (Llama 3.3 70B)
+                              ⚡ Perf      (Groq / Llama)
+                              ✅ Practices (Groq / Llama)
+                                    └─────────┬──────────┘
+                                              │
+                              ⚖️  Decision Layer   (Gemini)
+                                   Critical / Warning / Low
+                                              │
+                              🔧 Fix Generator     (Gemini)
+                                   corrected code + comments
+                                              │
+                              💬 Action Agent      (Gemini)
+                                   markdown table PR comment
+                                              │
+                              🎯 Final Reviewer    (Gemini)
+                                   score /10 + verdict
+                                              │
+                              ✅ Auto-posted to GitLab MR
 ```
 
 ---
 
-## 🕵️ Agent Breakdown
+## ✨ Features
 
-<table>
-<tr>
-<td width="33%">
-
-### 🐛 Agent 1 — Bug Detector
-
-- SQL Injection & XSS detection
-- Hardcoded secrets / API keys
-- Null/undefined edge cases
-- Memory leaks & infinite loops
-- Logic errors & wrong conditions
-
-</td>
-<td width="33%">
-
-### ⚡ Agent 2 — Performance Analyzer
-
-- Time & space complexity (Big-O)
-- Nested loop optimizations
-- Unnecessary re-renders
-- DB query inefficiencies
-- Caching & memoization gaps
-
-</td>
-<td width="33%">
-
-### ✅ Agent 3 — Best Practices
-
-- SOLID, DRY, KISS principles
-- Function responsibility (SRP)
-- Naming conventions
-- Anti-pattern detection
-- Comment & doc quality
-
-</td>
-</tr>
-</table>
+| Feature | Description |
+|---|---|
+| 🔒 **Security Scan** | SQL injection, XSS, hardcoded secrets, CORS issues |
+| 🐛 **Bug Detection** | Logic errors, edge cases, null risks, bad error handling |
+| ⚡ **Performance** | Big-O analysis, memory leaks, blocking operations |
+| ✅ **Best Practices** | SOLID principles, clean code, naming conventions |
+| ⚖️ **Severity Rating** | Critical / Warning / Low per category |
+| 🔧 **Fix Generator** | Full corrected code with `// FIXED:` comments |
+| 💬 **PR Comment** | Markdown table format — auto-posted to GitLab MR |
+| 🎯 **Final Report** | Score /10, strengths, production readiness verdict |
+| 🌐 **4 Input Types** | Paste / GitHub file URL / PR diff / GitLab MR URL |
+| 🔗 **Share Links** | Unique URL per review — no auth to view |
+| 📊 **Score History** | Track code quality over time |
+| 🧠 **isDiff Mode** | Analyze only changed lines — saves tokens |
+| 🔍 **Auto Detect** | Language detection from code patterns |
 
 ---
 
-## 📤 Sample Output
+## 🛠️ Tech Stack
 
-```markdown
-## 🤖 AI Code Review — by TheShivaji/ai-code-reviewer
+```
+Frontend                 Backend                  Database
+──────────────           ──────────────           ──────────
+React 19                 Node.js                  PostgreSQL
+Redux Toolkit            Express 5                Neon (cloud)
+Framer Motion            LangGraph 1.3.2          pg driver
+Tailwind CSS v4          LangChain
+Lucide Icons             JWT + bcrypt
+React Markdown           HTTP-only cookies
 
----
-
-### 🐛 Bug Report
-| Severity | Line | Issue |
-|----------|------|-------|
-| 🔴 Critical | L34 | SQL query vulnerable to injection — use parameterized queries |
-| 🟠 High | L12 | `user.id` accessed without null check — will crash on undefined |
-| 🟡 Medium | L67 | Missing error handling in async function |
-
----
-
-### ⚡ Performance Analysis
-- 🔴 **O(n²)** nested loop at Line 45 — refactor using `Map` → O(n)
-- 🟡 `getUserData()` called 3x in loop — extract outside, cache result
-- 🟢 Async/await used correctly — no unnecessary blocking
-
----
-
-### ✅ Best Practices
-- 🔴 `processData()` doing 6 things — violates Single Responsibility Principle
-- 🟡 Variables named `x`, `temp`, `data` — not descriptive enough
-- 🟢 Good use of `const` and immutability throughout
-
----
-
-### 📊 Final Summary
-> **Overall Score: 6.5 / 10**
-> Critical: 1 &nbsp;|&nbsp; High: 2 &nbsp;|&nbsp; Medium: 3 &nbsp;|&nbsp; Suggestions: 4
-
-*Generated by 3 LangGraph agents + Gemini synthesis*
+AI Models                Deploy
+──────────────           ──────────────
+Mistral Large            Render (Backend)
+Llama 3.3 70B            Vercel (Frontend)
+Gemini 2.0 Flash         Neon PostgreSQL
+Groq inference           Docker ready
 ```
 
 ---
 
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
 ai-code-reviewer/
-│
 ├── Backend/
-│   ├── agents/
-│   │   ├── bugDetector.js        # Agent 1 — security & logic
-│   │   ├── performanceAnalyzer.js # Agent 2 — complexity & optimization
-│   │   └── bestPractices.js      # Agent 3 — clean code & patterns
-│   ├── graph/
-│   │   └── reviewGraph.js        # LangGraph pipeline orchestration
-│   ├── gemini/
-│   │   └── summarizer.js         # Gemini final report generator
-│   ├── routes/
-│   │   └── review.js             # POST /api/review
-│   └── index.js                  # Express server entry point
+│   ├── Dockerfile
+│   ├── server.js
+│   └── src/
+│       ├── ai/
+│       │   ├── model.js              ← Mistral + Groq + Gemini
+│       │   ├── langraph.js           ← StateGraph pipeline
+│       │   ├── fetcher.agent.js      ← GitHub + GitLab + PR fetch
+│       │   │                           + postGitLabComment()
+│       │   ├── security.agent.js     ← Mistral security scan
+│       │   ├── decision.agent.js     ← severity classification
+│       │   ├── fixgenerator.agent.js ← corrected code
+│       │   └── action.agent.js       ← PR comment table format
+│       ├── controllers/
+│       │   ├── auth.controller.js
+│       │   └── review.controller.js  ← handles all 4 input types
+│       ├── db/
+│       │   ├── database.js           ← pg Pool (Neon + local)
+│       │   └── Schema.js             ← CREATE TABLE + ALTER
+│       ├── middleware/auth.middleware.js
+│       ├── routes/
+│       │   ├── auth.routes.js
+│       │   └── review.routes.js
+│       └── utils/
+│           ├── detectlanguage.js
+│           └── extractScore.js
 │
 └── Frontend/
-    ├── index.html                 # Code input UI
-    ├── style.css                  # Dark themed styles
-    └── main.js                   # API calls + result rendering
+    └── src/
+        ├── app/                       ← store + routes
+        └── features/
+            ├── auth/                  ← slice + pages + hooks
+            └── chat/
+                ├── reviewSlice.js
+                ├── pages/             ← Dashboard, History, SharedReview
+                ├── components/        ← Navbar, AgentLoader, ReviewResult, ReviewTabs
+                └── services/api.js
 ```
 
 ---
@@ -193,115 +146,111 @@ ai-code-reviewer/
 ## 🚀 Getting Started
 
 ### Prerequisites
-
-- **Node.js** v18+
-- **Gemini API Key** → [Get it free at Google AI Studio](https://aistudio.google.com/)
+- Node.js v18+
+- PostgreSQL (local) or Neon account
+- API keys: Mistral, Groq, Gemini
 
 ### Installation
 
 ```bash
-# Clone the repo
 git clone https://github.com/TheShivaji/ai-code-reviewer.git
 cd ai-code-reviewer
 
-# Backend setup
-cd Backend
-npm install
-
-# Configure environment
-cp .env.example .env
+cd Backend && npm install
+cd ../Frontend && npm install
 ```
+
+### Environment — `Backend/.env`
 
 ```env
-# .env
-GEMINI_API_KEY=your_gemini_api_key_here
 PORT=3000
+
+# Database
+DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
+# OR local
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=code_reviewer
+DB_USER=postgres
+DB_PASSWORD=your_password
+
+# Auth
+JWT_SECRET=your_secret
+FRONTEND_URL=http://localhost:5173
+
+# AI Keys
+MISTRAL_API_KEY=your_key
+GROQ_API_KEY=your_key
+GEMINI_API_KEY=your_key
+
+# GitLab (for auto-comment on MRs)
+GITLAB_TOKEN=your_personal_access_token
 ```
+
+### Run
 
 ```bash
-# Start the server
-npm start
-
-# Open Frontend — just open in browser
-cd ../Frontend
-open index.html    # or use VS Code Live Server
+cd Backend && npm run dev
+cd Frontend && npm run dev
 ```
 
-> Server runs at `http://localhost:3000`
-
----
-
-## 🔧 API Reference
-
-### `POST /api/review`
-
-```json
-// Request
-{
-  "code": "function fetchUser(id) { return db.query('SELECT * FROM users WHERE id=' + id) }",
-  "language": "javascript"
-}
 ```
-
-```json
-// Response
-{
-  "bugReport":            "SQL injection detected at line 1...",
-  "performanceAnalysis":  "Query runs O(n) scan — add index on id...",
-  "bestPractices":        "Function name is clear, but no error handling...",
-  "prComment":            "## 🤖 AI Code Review\n...",
-  "score":                5.5
-}
+Frontend → http://localhost:5173
+Backend  → http://localhost:3000
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 🔌 API
 
-<div align="center">
+```
+POST  /api/auth/register
+POST  /api/auth/login
+POST  /api/auth/logout
+GET   /api/auth/me
 
-<img src="https://skillicons.dev/icons?i=js,nodejs,express,html,css&theme=dark&perline=5" />
-
-</div>
-
-<br/>
-
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Frontend** | HTML + CSS + JS | Code input & result display |
-| **Backend** | Node.js + Express | API server |
-| **Agent Pipeline** | LangGraph | Multi-agent orchestration |
-| **AI Brain** | Google Gemini | Final synthesis & report |
-| **Output** | GitHub PR Markdown | Ready-to-use comment format |
-
----
-
-## 🤝 Contributing
-
-Contributions open hain! Koi naya agent add karna hai ya improvement suggest karni hai — welcome.
-
-```bash
-git checkout -b feature/your-feature
-git commit -m "feat: add your feature"
-git push origin feature/your-feature
-# Open a PR 🎉
+POST  /api/review/create        ← triggers 8-agent pipeline
+GET   /api/review/reviews        ← history
+GET   /api/review/score-history  ← score trend
+GET   /api/review/share/:token   ← public shared review
 ```
 
 ---
 
-## 📄 License
+## 📌 Roadmap
 
-MIT — free to use, fork, and build on.
+- [x] Auth — JWT + HTTP-only cookies
+- [x] PostgreSQL schema — 14 columns per review
+- [x] Fetcher Agent — GitHub + PR diff + GitLab MR
+- [x] 4 parallel agents — Security, Bug, Performance, Practices
+- [x] Decision Layer — severity classification
+- [x] Fix Generator — corrected code with comments
+- [x] Action Agent — markdown table PR comment
+- [x] Final Reviewer — score /10 + production verdict
+- [x] isDiff mode — diff-only token optimization
+- [x] Language auto-detection
+- [x] Score history tracking
+- [x] Shareable review links
+- [x] Redux Toolkit + Framer Motion UI
+- [x] GitLab MCP — auto-post review comment on MR
+- [x] Deployed — Render + Vercel + Neon PostgreSQL
+- [x] Docker support
+- [ ] Webhook — auto-trigger on MR create
+- [ ] Apply Fix — commit corrected code to GitLab
 
 ---
 
 <div align="center">
 
-**Built by [TheShivaji](https://github.com/TheShivaji)**
+**Built by [Shivaji Jagdale](https://github.com/TheShivaji)**
 
-*"Code review shouldn't be a bottleneck — it should be instant."*
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/prathamesh-jagdale-48817330b)
+[![GitHub](https://img.shields.io/badge/GitHub-171515?style=for-the-badge&logo=github&logoColor=white)](https://github.com/TheShivaji)
+[![Portfolio](https://img.shields.io/badge/Portfolio-7c3aed?style=for-the-badge&logo=safari&logoColor=white)](https://theshivaji.in)
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:2c5364,50:203a43,100:0f2027&height=100&section=footer" />
+*⭐ Star this repo if you find it useful*
 
 </div>
 
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:24243e,50:302b63,100:0f0c29&height=100&section=footer" />
+ENDOFFILE
