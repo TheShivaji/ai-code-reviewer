@@ -27,31 +27,35 @@ You paste code, drop a GitHub URL, link a PR, or give a GitLab MR URL — the ag
 
 ## 🧠 Agent Pipeline
 
-```
-  paste code ──┐
-  github url ──┼──► Fetcher Agent ──► LangGraph START
-  pr diff    ──┤                              │
-  gitlab mr  ──┘                    ┌─────────┴──────────┐
-                                    │    PARALLEL (4x)    │
-                              🔒 Security  (Mistral Large)
-                              🐛 Bug       (Llama 3.3 70B)
-                              ⚡ Perf      (Groq / Llama)
-                              ✅ Practices (Groq / Llama)
-                                    └─────────┬──────────┘
-                                              │
-                              ⚖️  Decision Layer   (Gemini)
-                                   Critical / Warning / Low
-                                              │
-                              🔧 Fix Generator     (Gemini)
-                                   corrected code + comments
-                                              │
-                              💬 Action Agent      (Gemini)
-                                   markdown table PR comment
-                                              │
-                              🎯 Final Reviewer    (Gemini)
-                                   score /10 + verdict
-                                              │
-                              ✅ Auto-posted to GitLab MR
+```mermaid
+graph LR
+
+    A[GitLab MR / PR Diff / GitHub URL / Code Input]
+
+    A --> B[Fetcher Agent]
+
+    B --> C1[🔒 Security Agent]
+    B --> C2[🐛 Bug Agent]
+    B --> C3[⚡ Performance Agent]
+    B --> C4[✅ Best Practices Agent]
+
+    C1 --> D[⚖️ Decision Layer]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+
+    D --> E[🔧 Fix Generator]
+
+    E --> F[💬 Action Agent]
+
+    F --> G[🎯 Final Reviewer]
+
+    G --> H[📊 Score & Verdict]
+
+    H --> I[📝 GitLab MR Comment]
+
+    I --> J[✅ Developer Feedback]
+
 ```
 
 ---
