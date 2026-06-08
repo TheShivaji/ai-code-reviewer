@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 import pool from "../db/database.js"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 const getCookieOptions = (req) => {
     const isProduction = process.env.NODE_ENV === 'production' || (req.headers.origin && req.headers.origin.startsWith('https'));
@@ -42,8 +42,8 @@ export const userRegister = async (req, res) => {
             user: result.rows[0]
         })
     } catch (error) {
-        return res.status(500).json({ message: error.message })
         console.log("Error in register", error.message)
+        return res.status(500).json({ message: error.message })
     }
 }
 
@@ -85,8 +85,8 @@ export const Login = async (req, res) => {
 
 
     } catch (error) {
-        return res.status(500).json({ message: error.message })
         console.log("Error in login", error.message)
+        return res.status(500).json({ message: error.message })
     }
 }
 

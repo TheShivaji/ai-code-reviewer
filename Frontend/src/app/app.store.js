@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import authReducer from '../features/auth/auth.slice'
+import authReducer from '../features/auth/states/auth.slice'
 import reviewReducer from '../features/chat/reviewSlice'
 
 export const store = configureStore({

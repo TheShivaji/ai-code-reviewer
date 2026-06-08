@@ -1,6 +1,5 @@
-import React from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
 import { Code2, History, LogOut, Plus } from 'lucide-react'
 import { useAuth } from '../../auth/hook/useAuth.js'

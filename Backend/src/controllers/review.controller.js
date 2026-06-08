@@ -53,6 +53,10 @@ export const createReview = async (req, res) => {
 
         const review = await reviewCode(code, language, sourceType, isDiff)
 
+        console.log(`[Review Controller] actualGitLabUrl: ${actualGitLabUrl}`)
+        console.log(`[Review Controller] Has pr_comment: ${!!review.pr_comment}`)
+        console.log(`[Review Controller] GITLAB_TOKEN exists: ${!!process.env.GITLAB_TOKEN}`)
+
         // GitLab pe auto comment post karo
         if (actualGitLabUrl && review.pr_comment) {
             const { postGitLabComment } = await import('../ai/fetcher.agent.js')

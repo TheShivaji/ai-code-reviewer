@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { Shield, Bug, Zap, Sparkles, Brain, Cpu, CheckCircle2, Circle } from 'lucide-react'
 
 const steps = [
@@ -59,7 +59,7 @@ export function AgentLoader() {
         </div>
 
         <h2 className="text-xl font-bold text-white tracking-wide">
-          Running Antigravity Agent Graph
+          Running CodeSentry AI Agent Graph
         </h2>
         <p className="text-sm text-slate-400 mt-1 max-w-md">
           A team of specialized AI agents is reviewing your code. This takes about 10-15 seconds.
@@ -86,7 +86,6 @@ export function AgentLoader() {
         {steps.map((step, index) => {
           const isCompleted = index < currentStep
           const isActive = index === currentStep
-          const isPending = index > currentStep
           const Icon = step.icon
 
           return (

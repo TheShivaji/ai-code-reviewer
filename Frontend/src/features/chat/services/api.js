@@ -1,4 +1,4 @@
-import { api } from '../../auth/services/api.js'
+import { api } from '../../auth/service/auth.api.js'
 
 export const createReview = async (payload) => {
   const { data } = await api.post('/review/create', payload)

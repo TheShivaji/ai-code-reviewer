@@ -13,7 +13,7 @@ const stateSchema = Annotation.Root({
     code: Annotation(),
     language: Annotation(),
     source_type: Annotation(),
-    is_Diff: Annotation(),
+    is_diff: Annotation(),
     security_feedback: Annotation(),
     bug_feedback: Annotation(),
     performance_feedback: Annotation(),
@@ -40,6 +40,10 @@ Analyze the given code carefully for:
 3. Bad error handling
 4. Null/undefined risks
 
+${state.is_diff 
+  ? "CRITICAL: The input is a Git diff (unified diff format). You MUST ONLY analyze the bug/quality issues introduced by the new/added lines (lines starting with '+'). Do NOT report bugs or code issues present in unchanged context lines (lines starting with a space) or removed lines (lines starting with '-'). Ignore unchanged code even if it has issues." 
+  : ""}
+
 Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
 
 Format:
@@ -59,11 +63,15 @@ Format:
             {
                 role: "user",
                 content: `
-Code:
+${state.is_diff ? 'Diff:' : 'Code:'}
 ${state.code}
 
 Language:
 ${state.language}
+
+${state.is_diff 
+  ? "CRITICAL WARNING: You must ONLY report issues for lines that start with '+'. Unchanged lines starting with a space (like ' for (let i = 0; ...') must NOT be reported as issues in the JSON 'issues' array. Strictly ignore them." 
+  : ""}
         `,
             },
         ]);
@@ -97,6 +105,10 @@ Analyze the code for:
 5. Blocking operations
 6. Poor async handling
 
+${state.is_diff 
+  ? "CRITICAL: The input is a Git diff (unified diff format). You MUST ONLY analyze performance issues introduced by the new/added lines (lines starting with '+'). Do NOT report performance issues present in unchanged context lines (lines starting with a space) or removed lines (lines starting with '-'). Ignore unchanged code even if it has issues." 
+  : ""}
+
 Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
 
 Format:
@@ -116,11 +128,15 @@ Format:
             {
                 role: "user",
                 content: `
-Code:
+${state.is_diff ? 'Diff:' : 'Code:'}
 ${state.code}
 
 Language:
 ${state.language}
+
+${state.is_diff 
+  ? "CRITICAL WARNING: You must ONLY report performance issues for lines that start with '+'. Unchanged lines starting with a space (like ' for (let i = 0; ...') must NOT be reported as issues in the JSON 'issues' array. Strictly ignore them." 
+  : ""}
         `,
             },
         ]);
@@ -153,6 +169,10 @@ Review the code for:
 4. SOLID principles
 5. Error handling and logging
 
+${state.is_diff 
+  ? "CRITICAL: The input is a Git diff (unified diff format). You MUST ONLY analyze best practice issues introduced by the new/added lines (lines starting with '+'). Do NOT report best practice issues present in unchanged context lines (lines starting with a space) or removed lines (lines starting with '-'). Ignore unchanged code even if it has issues." 
+  : ""}
+
 Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
 
 Format:
@@ -172,16 +192,20 @@ Format:
             {
                 role: "user",
                 content: `
-${state.is_diff
+                    ${state.is_diff
                         ? 'This is a CODE DIFF. Analyze ONLY the changed lines (lines starting with +). Ignore removed lines (-).'
                         : 'This is a complete code file. Analyze the entire file.'
                     }
 
-${state.is_diff ? 'Diff:' : 'Code:'}
-${state.code}
+                    ${state.is_diff ? 'Diff:' : 'Code:'}
+                    ${state.code}
 
-Language:
-${state.language}
+                    Language:
+                    ${state.language}
+
+                    ${state.is_diff 
+                      ? "CRITICAL WARNING: You must ONLY report best practice issues for lines that start with '+'. Unchanged lines starting with a space (like ' for (let i = 0; ...') must NOT be reported as issues in the JSON 'issues' array. Strictly ignore them." 
+                      : ""}
   `
             }
         ]);
@@ -207,11 +231,13 @@ const final_reviewer = async (state) => {
 You are a Staff-level code reviewer.
 
 Your job:
-1. Consolidate all findings
-2. Remove duplicate issues
-3. Prioritize critical problems
-4. Give an overall engineering assessment
-5. Decide production readiness
+1. Consolidate all findings from the provided Bug, Performance, and Best Practices reports.
+2. Remove duplicate issues.
+3. Prioritize critical problems.
+4. Give an overall engineering assessment.
+5. Decide production readiness.
+
+CRITICAL: You MUST ONLY report issues that are explicitly mentioned in the Bug, Performance, or Best Practices reports below. Do NOT assume, hallucinate, or add any other issues (such as loops or undefined variables) that are not present in the provided reports.
         `,
             },
             {
@@ -253,6 +279,8 @@ Explain whether this code is production ready or not.
 
 ## Final Verdict
 2-3 concise lines.
+
+[Unique ID: ${Date.now()}]
         `,
             },
         ]);

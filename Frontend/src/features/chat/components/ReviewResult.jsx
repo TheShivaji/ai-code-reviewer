@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import 'highlight.js/styles/github-dark.css'
 import ReviewTabs from './ReviewTabs.jsx'
-import { Copy, Check, Share2, AlertTriangle, ShieldCheck, Cpu, CheckCircle } from 'lucide-react'
+import { Copy, Check, Share2, CheckCircle } from 'lucide-react'
 
 const MarkdownContent = ({ content }) => (
     <div className='text-white/65 text-[13px] leading-relaxed prose prose-invert max-w-none
@@ -41,7 +41,7 @@ const IssuesCardView = ({ rawContent }) => {
             }
             parsedData = JSON.parse(jsonString.trim())
         }
-    } catch (e) {
+    } catch {
         // Not valid JSON, fall back to markdown
     }
 

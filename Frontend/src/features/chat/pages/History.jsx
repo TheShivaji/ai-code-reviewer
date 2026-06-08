@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
-  History as HistoryIcon, ArrowRight, ExternalLink, Calendar, 
-  Code2, BarChart2, MessageSquare, ShieldCheck, AlertCircle
+  History as HistoryIcon, ArrowRight, Calendar, 
+  BarChart2, AlertCircle
 } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import { getReviews as getReviewsAPI, getScoreHistory as getScoreHistoryAPI } from '../services/api.js'

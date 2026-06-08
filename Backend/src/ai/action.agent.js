@@ -18,14 +18,26 @@ Format requirements:
 - Use clear, friendly markdown.
 - Start with a quick summary of the changes proposed.
 - Provide a summary table of findings (Bugs, Security, Performance, Best Practices) indicating severity counts.
-- Add a collapsible section (<details><summary>View Suggested Code Fixes</summary>...) showing a git-like diff or side-by-side style comparison of the suggested fixes.
+- Add a collapsible section showing suggested fixes. You MUST put blank lines before and after the code blocks inside the details tags, otherwise GitLab/GitHub will not parse the markdown (it will render on a single line). Example format:
+  <details>
+  <summary>View Suggested Code Fixes</summary>
+
+  \`\`\`diff
+  ...
+  \`\`\`
+
+  \`\`\`javascript
+  ...
+  \`\`\`
+
+  </details>
 - Keep the tone helpful, constructive, and developer-friendly.
 `
             },
             {
                 role: "user",
                 content: `
-Original Code:
+${state.is_diff ? 'Original Diff:' : 'Original Code:'}
 ${state.code}
 
 Fixed Code:

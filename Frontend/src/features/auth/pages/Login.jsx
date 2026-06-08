@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mail, Lock, ArrowRight, Sparkles, AlertCircle } from 'lucide-react'
+import { Mail, Lock, ArrowRight, Sparkles, AlertCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../hook/useAuth.js'
 
 export const Login = () => {
@@ -15,6 +15,18 @@ export const Login = () => {
             navigate('/dashboard')
         }
     }, [user, navigate])
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden font-sans">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-600/10 rounded-full filter blur-[100px] animate-pulse"></div>
+                <div className="flex flex-col items-center z-10">
+                    <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-4" />
+                    <p className="text-slate-400 text-[10px] tracking-widest uppercase font-bold">Logging in to CodeSentry AI...</p>
+                </div>
+            </div>
+        )
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -39,7 +51,7 @@ export const Login = () => {
                         AI-Powered Code Analysis
                     </div>
                     <h1 className="text-3xl font-bold tracking-tight text-white">
-                        Antigravity Reviewer
+                        CodeSentry AI
                     </h1>
                     <p className="text-slate-400 mt-2 text-sm">
                         Log in to review and optimize your codebase with AI.

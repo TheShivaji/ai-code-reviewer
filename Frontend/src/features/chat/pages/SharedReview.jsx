@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Code2, ShieldCheck, Sparkles, ArrowRight, AlertCircle } from 'lucide-react'
+import { Code2, Sparkles, ArrowRight, AlertCircle } from 'lucide-react'
 import { getSharedReview as getSharedReviewAPI } from '../services/api.js'
 import { ReviewResult } from '../components/ReviewResult.jsx'
 
