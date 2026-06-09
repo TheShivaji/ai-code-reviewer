@@ -16,8 +16,6 @@
 
 ---
 
-## 🏆 Built for Google Cloud Rapid Agent Hackathon — GitLab Partner Track
-
 ### 😤 The Problem
 Manual code reviews are **slow, inconsistent, and miss critical issues**. Developers submit PRs and wait hours for feedback. Existing AI tools:
 - Review the **entire codebase** instead of only the changed lines (wastes tokens)
