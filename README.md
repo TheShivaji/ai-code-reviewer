@@ -2,7 +2,7 @@
 
 <br/>
 
-[![Live](https://img.shields.io/badge/◉%20LIVE-ai--code--reviewer-7c3aed?style=for-the-badge)](https://ai-code-reviewer-iota.vercel.app)
+[![Live](https://img.shields.io/badge/◉%20LIVE-ai--code--reviewer-7c3aed?style=for-the-badge)](https://ai-code-reviewer.theshivaji.in/)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1.3.2-a855f7?style=flat-square)
 ![Agents](https://img.shields.io/badge/Agents-8-7c3aed?style=flat-square)
 ![Stack](https://img.shields.io/badge/MERN-PostgreSQL-0077B5?style=flat-square)
