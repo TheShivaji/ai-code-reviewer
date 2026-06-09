@@ -1,5 +1,5 @@
 import pool from '../db/database.js'
-import { reviewCode } from '../ai/langraph.js'
+import { reviewCode } from '../ai/langgraph.js'
 import { detectLanguage } from '../utils/detectlanguage.js'
 import { extractScore } from '../utils/extractScore.js'
 import { fetchFromURL } from '../ai/fetcher.agent.js'

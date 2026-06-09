@@ -8,6 +8,7 @@
 ![Stack](https://img.shields.io/badge/MERN-PostgreSQL-0077B5?style=flat-square)
 ![Deploy](https://img.shields.io/badge/Render-Vercel-22c55e?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square)
+![Hackathon](https://img.shields.io/badge/Google%20Cloud%20Rapid%20Agent%20Hackathon-GitLab%20Partner%20Track-FC6D26?style=flat-square&logo=gitlab)
 
 > **8 specialized AI agents. One unified pipeline. Auto-posts review comments on GitLab MRs.**
 
@@ -15,11 +16,56 @@
 
 ---
 
+## 🏆 Built for Google Cloud Rapid Agent Hackathon — GitLab Partner Track
+
+### 😤 The Problem
+Manual code reviews are **slow, inconsistent, and miss critical issues**. Developers submit PRs and wait hours for feedback. Existing AI tools:
+- Review the **entire codebase** instead of only the changed lines (wastes tokens)
+- **Crash silently** when model rate limits hit — leaving developers stuck at a loading spinner
+- Don't integrate with your **actual Git workflow** — reviews live outside your repo
+
+### ✅ The Solution — CodeSentry AI
+An 8-agent LangGraph pipeline that:
+- Reviews code **in parallel** across 4 dimensions (Security, Bugs, Performance, Best Practices)
+- **Analyzes only the diff** (lines starting with `+`) — not the entire file — for precise, token-efficient PR reviews
+- **Auto-posts** a structured review comment with severity tables and fix suggestions directly on your **GitLab Merge Request thread**
+- Has **zero-downtime fallback** — if Gemini hits quota limits, Groq Llama 3.3 takes over instantly via try-catch
+
+---
+
+## 🎬 Demo
+
+> 🌐 **Live App**: [https://ai-code-reviewer.theshivaji.in](https://ai-code-reviewer.theshivaji.in)
+
+### 🕹️ How to Test & Review (Step-by-Step)
+
+#### **Flow 1: Quick Dashboard Review**
+1. Copy a buggy code snippet (you can use our clean commentless test snippet).
+2. Go to the dashboard and paste it.
+3. Click **Review Code** to see the 8 AI agents run in parallel and output the score, feedback cards, and fixed code.
+
+#### **Flow 2: GitLab Automated MR Review**
+1. **Create a Branch:** In your GitLab repository, create a new branch (e.g., `review-test-branch`).
+2. **Add a File:** Commit a file named `demo.test.js` containing buggy code to this branch.
+3. **Open an MR:** Create a **Merge Request (MR)** on GitLab.
+4. **Run Analysis:** Copy the GitLab MR URL (e.g., `https://gitlab.com/<username>/<repo>/-/merge_requests/<id>`), paste it in the CodeSentry AI dashboard, and click analyze.
+5. **Check GitLab:** Once the analysis finishes, refresh your GitLab MR page. You will see a detailed, structured markdown review comment auto-posted directly in the MR thread!
+
+---
+
+> [!NOTE]  
+> **A Note on GitLab Authentication & Future Scope:**  
+> Currently, the backend uses a system-wide `GITLAB_TOKEN` (Personal Access Token with API scope) configured in the server's environment variables to write comments on MRs.  
+>   
+> **OAuth Roadmap:** To make it completely decentralized and user-specific, a **GitLab OAuth integration** is planned. This will allow individual users to log in with their GitLab accounts, granting permission to comment on their behalf securely. This feature is scheduled for implementation immediately after the developer's ongoing college exams.
+
+---
+
 ## ⚡ What is this?
 
 Not another "ask ChatGPT to review my code" wrapper.
 
-This is a **stateful LangGraph pipeline** — 4 agents run in parallel, feed their results into a decision layer, which triggers a fix generator, then an action agent formats a PR comment table, and finally a staff-level reviewer produces a complete engineering report.
+This is an **8-agent stateful LangGraph pipeline** — a Fetcher agent retrieves the code/diff, 4 specialized agents (Security, Bugs, Performance, and Best Practices) analyze it in parallel, feed their findings into a Decision Layer agent, which triggers a Fix Generator agent, followed by an Action Agent to format the comment, and finally a Staff-level Reviewer agent that scores and produces the final report.
 
 You paste code, drop a GitHub URL, link a PR, or give a GitLab MR URL — the agents handle the rest, and the review **automatically posts as a comment on your GitLab MR**.
 
@@ -110,7 +156,7 @@ ai-code-reviewer/
 │   └── src/
 │       ├── ai/
 │       │   ├── model.js              ← Mistral + Groq + Gemini
-│       │   ├── langraph.js           ← StateGraph pipeline
+│       │   ├── langgraph.js          ← StateGraph pipeline
 │       │   ├── fetcher.agent.js      ← GitHub + GitLab + PR fetch
 │       │   │                           + postGitLabComment()
 │       │   ├── security.agent.js     ← Mistral security scan
@@ -246,7 +292,7 @@ GET   /api/review/share/:token   ← public shared review
 
 **Built by [Shivaji Jagdale](https://github.com/TheShivaji)**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/prathamesh-jagdale-48817330b)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/shivaji-jagdale-48817330b/)
 [![GitHub](https://img.shields.io/badge/GitHub-171515?style=for-the-badge&logo=github&logoColor=white)](https://github.com/TheShivaji)
 [![Portfolio](https://img.shields.io/badge/Portfolio-7c3aed?style=for-the-badge&logo=safari&logoColor=white)](https://theshivaji.in)
 
