@@ -8,7 +8,6 @@
 ![Stack](https://img.shields.io/badge/MERN-PostgreSQL-0077B5?style=flat-square)
 ![Deploy](https://img.shields.io/badge/Render-Vercel-22c55e?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square)
-![Hackathon](https://img.shields.io/badge/Google%20Cloud%20Rapid%20Agent%20Hackathon-GitLab%20Partner%20Track-FC6D26?style=flat-square&logo=gitlab)
 
 > **8 specialized AI agents. One unified pipeline. Auto-posts review comments on GitLab MRs.**
 
