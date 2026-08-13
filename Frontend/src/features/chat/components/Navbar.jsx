@@ -9,7 +9,7 @@ export default function Navbar() {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const location = useLocation()
-    const { user, logoutUser } = useAuth()
+    const { user, handleLogout: logoutUser } = useAuth()
 
     const handleLogout = async () => {
         try {

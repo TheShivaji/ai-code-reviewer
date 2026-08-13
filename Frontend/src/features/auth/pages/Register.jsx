@@ -8,7 +8,7 @@ export const Register = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { loading, registerUser, error, user } = useAuth()
+  const { loading, handleSignup, error, user } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await registerUser(name, email, password)
+      await handleSignup(name, email, password)
     } catch {
       console.error('Registration failed')
     }

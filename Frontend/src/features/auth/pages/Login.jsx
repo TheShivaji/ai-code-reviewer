@@ -7,7 +7,7 @@ import { useAuth } from '../hook/useAuth.js'
 export const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const { loading, loginUser, error, user } = useAuth()
+    const { loading, handleLogin, error, user } = useAuth()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -31,7 +31,7 @@ export const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
-            await loginUser(email, password)
+            await handleLogin(email, password)
         } catch (err) {
             console.error('Login failed:', err)
         }
