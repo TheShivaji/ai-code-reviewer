@@ -1,11 +1,13 @@
 import { gemini } from "./model.js"
+import { traceable } from "langsmith/traceable"
 
-export const fix_generator = async (state) => {
-    try {
-        const response = await gemini.invoke([
-            {
-                role: "system",
-                content: `
+export const fix_generator = traceable(
+    async (state) => {
+        try {
+            const response = await gemini.invoke([
+                {
+                    role: "system",
+                    content: `
 You are a senior software engineer.
 
 Your job:
@@ -24,10 +26,10 @@ Rules:
 - Do NOT change working code
 - Return ONLY the fixed code, no explanation outside code
         `
-            },
-            {
-                role: "user",
-                content: `
+                },
+                {
+                    role: "user",
+                    content: `
 ${state.is_diff ? 'Original Diff:' : 'Original Code:'}
 ${state.code}
 
@@ -37,13 +39,15 @@ Security Issues: ${state.security_feedback}
 Bug Issues: ${state.bug_feedback}
 Performance Issues: ${state.performance_feedback}
         `
-            }
-        ])
+                }
+            ])
 
-        return { fixed_code: response.content }
+            return { fixed_code: response.content }
 
-    } catch (error) {
-        console.log("Fix Generator Error:", error.message)
-        return { fixed_code: "Fix generation failed." }
-    }
-}
+        } catch (error) {
+            console.log("Fix Generator Error:", error.message)
+            return { fixed_code: "Fix generation failed." }
+        }
+    },
+    { name: "fix_generator", run_type: "chain" }
+)

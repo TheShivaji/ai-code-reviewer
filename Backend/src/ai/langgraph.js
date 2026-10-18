@@ -1,11 +1,14 @@
+import dotenv from "dotenv"
+dotenv.config()
 import { StateGraph, START, END, Annotation } from "@langchain/langgraph"
 import { z } from "zod"
-import { groq, llama, gemini, mistral } from "./model.js"
+import { gemini } from "./model.js"
 import { fetchFromURL } from "./fetcher.agent.js"
 import { security_agent } from "./security.agent.js"
 import { decision_layer } from "./decision.agent.js"
 import { fix_generator } from "./fixgenerator.agent.js"
 import { action_agent } from "./action.agent.js"
+import { traceable } from "langsmith/traceable"
 
 
 
@@ -26,77 +29,62 @@ const stateSchema = Annotation.Root({
 })
 
 
-const bug_detector = async (state) => {
-    try {
-        const response = await llama.invoke([
-            {
-                role: "system",
-                content: `
-You are a senior software engineer and code auditor.
+const agentIssueSchema = z.object({
+    title: z.string().describe("Short title describing the issue"),
+    severity: z.enum(["Critical", "High", "Medium", "Low", "Warning"]).describe("Severity level"),
+    description: z.string().describe("Specific details of the issue"),
+    fix: z.string().describe("Corrected code block or description of fix"),
+})
 
+const agentFeedbackSchema = z.object({
+    issues: z.array(agentIssueSchema).describe("List of detected issues"),
+    summary: z.string().describe("Overall summary of findings"),
+})
+
+const structuredAgentModel = gemini.withStructuredOutput(agentFeedbackSchema)
+
+const bug_detector = traceable(
+    async (state) => {
+        try {
+            const response = await structuredAgentModel.invoke([
+                {
+                    role: "system",
+                    content: `You are a senior software engineer and code auditor.
 Analyze the given code carefully for:
 1. Logic bugs
 2. Edge cases
 3. Bad error handling
 4. Null/undefined risks
+${state.is_diff ? "CRITICAL: The input is a Git diff. You MUST ONLY analyze issues introduced by the new/added lines (lines starting with '+')." : ""}`
+                },
+                {
+                    role: "user",
+                    content: `${state.is_diff ? 'Diff:' : 'Code:'}\n${state.code}\n\nLanguage:\n${state.language}`
+                },
+            ]);
 
-${state.is_diff 
-  ? "CRITICAL: The input is a Git diff (unified diff format). You MUST ONLY analyze the bug/quality issues introduced by the new/added lines (lines starting with '+'). Do NOT report bugs or code issues present in unchanged context lines (lines starting with a space) or removed lines (lines starting with '-'). Ignore unchanged code even if it has issues." 
-  : ""}
+            return {
+                bug_feedback: JSON.stringify(response),
+            };
+        } catch (error) {
+            console.log("Bug Detector Error:", error.message);
 
-Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
-
-Format:
-{
-  "issues": [
-    {
-      "title": "Short title describing the bug",
-      "severity": "Critical/High/Medium/Low",
-      "description": "Specific details of what is wrong and why",
-      "fix": "Corrected code block or description of fix"
-    }
-  ],
-  "summary": "Overall summary of code bugs and quality"
-}
-        `,
-            },
-            {
-                role: "user",
-                content: `
-${state.is_diff ? 'Diff:' : 'Code:'}
-${state.code}
-
-Language:
-${state.language}
-
-${state.is_diff 
-  ? "CRITICAL WARNING: You must ONLY report issues for lines that start with '+'. Unchanged lines starting with a space (like ' for (let i = 0; ...') must NOT be reported as issues in the JSON 'issues' array. Strictly ignore them." 
-  : ""}
-        `,
-            },
-        ]);
-
-        return {
-            bug_feedback: response.content,
-        };
-    } catch (error) {
-        console.log("Bug Detector Error:", error.message);
-
-        return {
-            bug_feedback: JSON.stringify({ issues: [], summary: "Bug analysis failed." }),
-        };
-    }
-};
+            return {
+                bug_feedback: JSON.stringify({ issues: [], summary: "Bug analysis failed." }),
+            };
+        }
+    },
+    { name: "bug_detector", run_type: "chain" }
+);
 
 
-const performance_analyser = async (state) => {
-    try {
-        const response = await groq.invoke([
-            {
-                role: "system",
-                content: `
-You are a senior performance engineer.
-
+const performance_analyser = traceable(
+    async (state) => {
+        try {
+            const response = await structuredAgentModel.invoke([
+                {
+                    role: "system",
+                    content: `You are a senior performance engineer.
 Analyze the code for:
 1. Time complexity issues
 2. Memory inefficiencies
@@ -104,145 +92,87 @@ Analyze the code for:
 4. Expensive operations
 5. Blocking operations
 6. Poor async handling
+${state.is_diff ? "CRITICAL: The input is a Git diff. You MUST ONLY analyze performance issues introduced by the new/added lines (lines starting with '+')." : ""}`
+                },
+                {
+                    role: "user",
+                    content: `${state.is_diff ? 'Diff:' : 'Code:'}\n${state.code}\n\nLanguage:\n${state.language}`
+                },
+            ]);
 
-${state.is_diff 
-  ? "CRITICAL: The input is a Git diff (unified diff format). You MUST ONLY analyze performance issues introduced by the new/added lines (lines starting with '+'). Do NOT report performance issues present in unchanged context lines (lines starting with a space) or removed lines (lines starting with '-'). Ignore unchanged code even if it has issues." 
-  : ""}
+            return {
+                performance_feedback: JSON.stringify(response),
+            };
+        } catch (error) {
+            console.log("Performance Analyser Error:", error.message);
 
-Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
-
-Format:
-{
-  "issues": [
-    {
-      "title": "Short title describing the performance issue",
-      "severity": "Critical/High/Medium/Low",
-      "description": "Specific details of performance bottleneck and Big-O impact",
-      "fix": "Corrected code block or description of optimization"
-    }
-  ],
-  "summary": "Overall summary of code performance"
-}
-        `,
-            },
-            {
-                role: "user",
-                content: `
-${state.is_diff ? 'Diff:' : 'Code:'}
-${state.code}
-
-Language:
-${state.language}
-
-${state.is_diff 
-  ? "CRITICAL WARNING: You must ONLY report performance issues for lines that start with '+'. Unchanged lines starting with a space (like ' for (let i = 0; ...') must NOT be reported as issues in the JSON 'issues' array. Strictly ignore them." 
-  : ""}
-        `,
-            },
-        ]);
-
-        return {
-            performance_feedback: response.content,
-        };
-    } catch (error) {
-        console.log("Performance Analyser Error:", error.message);
-
-        return {
-            performance_feedback: JSON.stringify({ issues: [], summary: "Performance analysis failed." }),
-        };
-    }
-};
+            return {
+                performance_feedback: JSON.stringify({ issues: [], summary: "Performance analysis failed." }),
+            };
+        }
+    },
+    { name: "performance_analyser", run_type: "chain" }
+);
 
 
-const best_practices_feedback = async (state) => {
-    try {
-        const response = await groq.invoke([
-            {
-                role: "system",
-                content: `
-You are a senior software architect.
-
+const best_practices_feedback = traceable(
+    async (state) => {
+        try {
+            const response = await structuredAgentModel.invoke([
+                {
+                    role: "system",
+                    content: `You are a senior software architect.
 Review the code for:
 1. Clean code principles
 2. Naming conventions
 3. Reusability and Maintainability
 4. SOLID principles
 5. Error handling and logging
+${state.is_diff ? "CRITICAL: The input is a Git diff. You MUST ONLY analyze best practice issues introduced by the new/added lines (lines starting with '+')." : ""}`
+                },
+                {
+                    role: "user",
+                    content: `${state.is_diff ? 'Diff:' : 'Code:'}\n${state.code}\n\nLanguage:\n${state.language}`
+                }
+            ]);
 
-${state.is_diff 
-  ? "CRITICAL: The input is a Git diff (unified diff format). You MUST ONLY analyze best practice issues introduced by the new/added lines (lines starting with '+'). Do NOT report best practice issues present in unchanged context lines (lines starting with a space) or removed lines (lines starting with '-'). Ignore unchanged code even if it has issues." 
-  : ""}
+            return {
+                best_practices_feedback: JSON.stringify(response),
+            };
+        } catch (error) {
+            console.log("Best Practices Error:", error.message);
 
-Return ONLY valid JSON. No markdown. No code fences. No explanations outside JSON.
+            return {
+                best_practices_feedback: JSON.stringify({ issues: [], summary: "Best practices analysis failed." }),
+            };
+        }
+    },
+    { name: "best_practices_agent", run_type: "chain" }
+);
 
-Format:
-{
-  "issues": [
-    {
-      "title": "Short title describing the best practice violation",
-      "severity": "Critical/High/Medium/Low",
-      "description": "Specific details of best practice violation and maintainability impact",
-      "fix": "Corrected code block or description of improvement"
-    }
-  ],
-  "summary": "Overall summary of code patterns and design"
-}
-        `,
-            },
-            {
-                role: "user",
-                content: `
-                    ${state.is_diff
-                        ? 'This is a CODE DIFF. Analyze ONLY the changed lines (lines starting with +). Ignore removed lines (-).'
-                        : 'This is a complete code file. Analyze the entire file.'
-                    }
 
-                    ${state.is_diff ? 'Diff:' : 'Code:'}
-                    ${state.code}
-
-                    Language:
-                    ${state.language}
-
-                    ${state.is_diff 
-                      ? "CRITICAL WARNING: You must ONLY report best practice issues for lines that start with '+'. Unchanged lines starting with a space (like ' for (let i = 0; ...') must NOT be reported as issues in the JSON 'issues' array. Strictly ignore them." 
-                      : ""}
-  `
-            }
-        ]);
-
-        return {
-            best_practices_feedback: response.content,
-        };
-    } catch (error) {
-        console.log("Best Practices Error:", error.message);
-
-        return {
-            best_practices_feedback: JSON.stringify({ issues: [], summary: "Best practices analysis failed." }),
-        };
-    }
-};
-
-const final_reviewer = async (state) => {
-    try {
-        const response = await gemini.invoke([
-            {
-                role: "system",
-                content: `
+const final_reviewer = traceable(
+    async (state) => {
+        try {
+            const response = await gemini.invoke([
+                {
+                    role: "system",
+                    content: `
 You are a Staff-level code reviewer.
 
 Your job:
 1. Consolidate all findings from the provided Bug, Performance, and Best Practices reports.
-2. Remove duplicate issues.
-3. Prioritize critical problems.
-4. Give an overall engineering assessment.
-5. Decide production readiness.
+2. Remove duplicate issues and prioritize critical problems.
+3. Give an overall engineering assessment and decide production readiness.
+4. Keep the review concise, punchy, and to the point (under 250 words).
 
-CRITICAL: You MUST ONLY report issues that are explicitly mentioned in the Bug, Performance, or Best Practices reports below. Do NOT assume, hallucinate, or add any other issues (such as loops or undefined variables) that are not present in the provided reports.
-        `,
-            },
-            {
-                role: "user",
-                content: `
+CRITICAL: You MUST ONLY report issues that are explicitly mentioned in the Bug, Performance, or Best Practices reports below. Do NOT assume, hallucinate, or add any other issues that are not present in the provided reports.
+            `,
+
+                },
+                {
+                    role: "user",
+                    content: `
 Bug Analysis:
 ${state.bug_feedback}
 
@@ -281,19 +211,21 @@ Explain whether this code is production ready or not.
 2-3 concise lines.
 
 [Unique ID: ${Date.now()}]
-        `,
-            },
-        ]);
-        return {
-            final_review: response.content,
-        };
-    } catch (error) {
-        console.log("Final Reviewer Error:", error.message);
-        return {
-            final_review: "Final review failed.",
-        };
-    }
-};
+            `,
+                },
+            ]);
+            return {
+                final_review: response.content,
+            };
+        } catch (error) {
+            console.log("Final Reviewer Error:", error.message);
+            return {
+                final_review: "Final review failed.",
+            };
+        }
+    },
+    { name: "final_reviewer", run_type: "chain" }
+);
 // Lang graph
 const graph = new StateGraph(stateSchema)
     .addNode("security_agent", security_agent)
@@ -329,24 +261,33 @@ const graph = new StateGraph(stateSchema)
     .addEdge("final_reviewer", END)
     .compile()
 
-export const reviewCode = async (code, language, sourceType = 'paste', isDiff = false) => {
-    console.log("Invoking graph with input:", { code, language, sourceType, isDiff });
-    const result = await graph.invoke({
-        code,
-        language,
-        source_type: sourceType,
-        is_diff: isDiff
-    })
-    console.log("Graph invoke returned:", result);
+const _reviewCodePipeline = traceable(
+    async (code, language, sourceType = 'paste', isDiff = false) => {
+        console.log("Invoking graph with input:", { code, language, sourceType, isDiff });
+        const result = await graph.invoke({
+            code,
+            language,
+            source_type: sourceType,
+            is_diff: isDiff
+        })
+        console.log("Graph invoke returned:", result);
 
-    return {
-        security_feedback: result.security_feedback,
-        bug_feedback: result.bug_feedback,
-        performance_feedback: result.performance_feedback,
-        best_practices_feedback: result.best_practices_feedback,
-        severity: result.severity,
-        fixed_code: result.fixed_code,
-        pr_comment: result.pr_comment,
-        final_review: result.final_review,
+        return {
+            security_feedback: result.security_feedback,
+            bug_feedback: result.bug_feedback,
+            performance_feedback: result.performance_feedback,
+            best_practices_feedback: result.best_practices_feedback,
+            severity: result.severity,
+            fixed_code: result.fixed_code,
+            pr_comment: result.pr_comment,
+            final_review: result.final_review,
+        }
+    },
+    {
+        name: "AI Code Reviewer Pipeline",
+        run_type: "chain",
+        tags: ["langgraph", "code-review"],
     }
-}
+)
+
+export const reviewCode = _reviewCodePipeline
